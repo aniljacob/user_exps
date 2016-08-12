@@ -42,7 +42,7 @@ int main(int argc, char *argv[])
 	memset(&if_ip, 0, sizeof(struct ifreq));
 
 	/* Open PF_PACKET socket, listening for EtherType ETHER_TYPE, it will sniff only Rx packets */
-	//if ((sockfd = socket(PF_PACKET, SOCK_RAW, htons(ETHER_TYPE))) == -1) {
+	if ((sockfd = socket(PF_PACKET, SOCK_RAW, htons(ETHER_TYPE))) == -1) {
 		perror("listener: socket");	
 		return -1;
 	}
