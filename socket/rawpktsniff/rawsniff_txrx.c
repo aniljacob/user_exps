@@ -66,32 +66,11 @@ int main(int argc, char *argv[])
 	}
 
 	while(1){
+		memset(buf, 0, BUF_SIZ);
 		printf("listener: Waiting to recvfrom...\n");
 		numbytes = recvfrom(sockfd, buf, BUF_SIZ, 0, NULL, NULL);
 		printf("listener: got packet %lu bytes\n", numbytes);
 
-#if 0
-		/* Check the packet is for me */
-		if (eh->ether_dhost[0] == DEST_MAC0 &&
-				eh->ether_dhost[1] == DEST_MAC1 &&
-				eh->ether_dhost[2] == DEST_MAC2 &&
-				eh->ether_dhost[3] == DEST_MAC3 &&
-				eh->ether_dhost[4] == DEST_MAC4 &&
-				eh->ether_dhost[5] == DEST_MAC5) {
-			printf("Correct destination MAC address\n");
-		} else {
-			printf("Wrong destination MAC: %x:%x:%x:%x:%x:%x\n",
-					eh->ether_dhost[0],
-					eh->ether_dhost[1],
-					eh->ether_dhost[2],
-					eh->ether_dhost[3],
-					eh->ether_dhost[4],
-					eh->ether_dhost[5]);
-
-			ret = -1;
-			goto done;
-		}
-#endif
 		/* Get source IP */
 		((struct sockaddr_in *)&their_addr)->sin_addr.s_addr = iph->saddr;
 		inet_ntop(AF_INET, &((struct sockaddr_in*)&their_addr)->sin_addr, sender, sizeof sender);
@@ -101,15 +80,7 @@ int main(int argc, char *argv[])
 		if (ioctl(sockfd, SIOCGIFADDR, &if_ip) >= 0) { /* if we can't check then don't */
 			printf("Source IP: %s\nMy IP: %s\n", sender, 
 					inet_ntoa(((struct sockaddr_in *)&if_ip.ifr_addr)->sin_addr));
-			/* ignore if I sent it */
-			if (strcmp(sender, inet_ntoa(((struct sockaddr_in *)&if_ip.ifr_addr)->sin_addr)) == 0)	{
-				printf("but I sent it :(\n");
-			}else
-				continue;
 		}
-
-		/* UDP payload length */
-		ret = ntohs(udph->len) - sizeof(struct udphdr);
 
 		/* Print packet */
 		printf("\tData:");
