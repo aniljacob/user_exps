@@ -8,6 +8,8 @@ then my_pkt->data points to the beginning of a 50-byte general-purpose buffer.
 Only the final member of a struct is allowed to be defined this way.
 
 To be more compliant with C99, omit the 0 and write char data[];.
+
+Refer http://gcc.gnu.org/onlinedocs/gcc-4.5.0/gcc/Zero-Length.html#Zero-Length for finding what gcc says
 */
 
 #include <stdio.h>
