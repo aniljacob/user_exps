@@ -1,0 +1,15 @@
+compile the app with and without #define DISTINCT_CACHE_LINES
+run the app
+#time ./cache-parallel
+
+see the real time
+
+without cache padding cache bouncing will happen
+real	0m5.799s
+user	0m11.581s
+sys	0m0.003s
+
+with cache padding cache bouncing will not happen
+real	0m5.391s
+user	0m10.747s
+sys	0m0.001s
