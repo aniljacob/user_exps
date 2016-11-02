@@ -1,0 +1,3146 @@
+/opt/fsl-qoriq/f140/1.9/sysroots/x86_64-fslsdk-linux/usr/bin/rpm
+Name: netbase
+Name: kexec-tools
+Name: lmsensors-config-libsensors
+Name: fbset-modes
+Name: busybox
+postinstall scriptlet (using /bin/sh):
+# busybox - postinst
+	# This part of code is dedicated to the on target upgrade problem.
+	# It's known that if we don't make appropriate symlinks before update-alternatives calls,
+	# there will be errors indicating missing commands such as 'sed'.
+	# These symlinks will later be updated by update-alternatives calls.
+	test -n 2 > /dev/null || alias test='busybox test'
+	if test "x$D" = "x"; then
+		# Remove busybox.nosuid if it's a symlink, because this situation indicates
+		# that we're installing or upgrading to a one-binary busybox.
+		if test -h /bin/busybox.nosuid; then
+			rm -f /bin/busybox.nosuid
+		fi
+		for suffix in "" ".nosuid" ".suid"; do
+			if test -e /etc/busybox.links$suffix; then
+				while read link; do
+					if test ! -e "$link"; then
+						case "$link" in
+							/*/*/*)
+								to="../../bin/busybox$suffix"
+								;;
+							/bin/*)
+								to="busybox$suffix"
+								;;
+							/*/*)
+								to="../bin/busybox$suffix"
+								;;
+						esac
+						# we can use busybox here because even if we are using splitted busybox
+						# we've made a symlink from /bin/busybox to /bin/busybox.nosuid.
+						busybox rm -f $link
+						busybox ln -s $to $link
+					fi
+				done < /etc/busybox.links$suffix
+			fi
+		done
+	fi
+	update-alternatives --install /usr/bin/ar ar /bin/busybox 50
+	update-alternatives --install /bin/gunzip gunzip /bin/busybox 50
+	update-alternatives --install /bin/zcat zcat /bin/busybox 50
+	update-alternatives --install /usr/bin/bunzip2 bunzip2 /bin/busybox 50
+	update-alternatives --install /usr/bin/bzcat bzcat /bin/busybox 50
+	update-alternatives --install /usr/bin/unlzma unlzma /bin/busybox 50
+	update-alternatives --install /usr/bin/lzcat lzcat /bin/busybox 50
+	update-alternatives --install /usr/bin/lzma lzma /bin/busybox 50
+	update-alternatives --install /usr/bin/unxz unxz /bin/busybox 50
+	update-alternatives --install /usr/bin/xzcat xzcat /bin/busybox 50
+	update-alternatives --install /usr/bin/xz xz /bin/busybox 50
+	update-alternatives --install /usr/bin/bzip2 bzip2 /bin/busybox 50
+	update-alternatives --install /bin/cpio cpio /bin/busybox 50
+	update-alternatives --install /bin/gzip gzip /bin/busybox 50
+	update-alternatives --install /bin/lzop lzop /bin/busybox 50
+	update-alternatives --install /usr/bin/lzopcat lzopcat /bin/busybox 50
+	update-alternatives --install /usr/bin/unlzop unlzop /bin/busybox 50
+	update-alternatives --install /bin/rpm rpm /bin/busybox 50
+	update-alternatives --install /usr/bin/rpm2cpio rpm2cpio /bin/busybox 50
+	update-alternatives --install /bin/tar tar /bin/busybox 50
+	update-alternatives --install /usr/bin/unzip unzip /bin/busybox 50
+	update-alternatives --install /bin/date date /bin/busybox 50
+	update-alternatives --install /usr/bin/hostid hostid /bin/busybox 50
+	update-alternatives --install /usr/bin/groups groups /bin/busybox 50
+	update-alternatives --install /usr/bin/id id /bin/busybox 50
+	update-alternatives --install /usr/bin/shuf shuf /bin/busybox 50
+	update-alternatives --install /bin/touch touch /bin/busybox 50
+	update-alternatives --install /usr/bin/unlink unlink /bin/busybox 50
+	update-alternatives --install /bin/base64 base64 /bin/busybox 50
+	update-alternatives --install /usr/bin/users users /bin/busybox 50
+	update-alternatives --install /usr/bin/who who /bin/busybox 50
+	update-alternatives --install /usr/bin/awk awk /bin/busybox 50
+	update-alternatives --install /usr/bin/cmp cmp /bin/busybox 50
+	update-alternatives --install /usr/bin/diff diff /bin/busybox 50
+	update-alternatives --install /bin/ed ed /bin/busybox 50
+	update-alternatives --install /usr/bin/patch patch /bin/busybox 50
+	update-alternatives --install /bin/sed sed /bin/busybox 50
+	update-alternatives --install /bin/vi vi /bin/busybox 50
+	update-alternatives --install /usr/bin/find find /bin/busybox 50
+	update-alternatives --install /bin/grep grep /bin/busybox 50
+	update-alternatives --install /bin/egrep egrep /bin/busybox 50
+	update-alternatives --install /bin/fgrep fgrep /bin/busybox 50
+	update-alternatives --install /usr/bin/xargs xargs /bin/busybox 50
+	update-alternatives --install /sbin/bootchartd bootchartd /bin/busybox 50
+	update-alternatives --install /sbin/halt halt /bin/busybox 50
+	update-alternatives --install /sbin/poweroff poweroff /bin/busybox 50
+	update-alternatives --install /sbin/reboot reboot /bin/busybox 50
+	update-alternatives --install /sbin/init init /bin/busybox 50
+	update-alternatives --install /linuxrc linuxrc /bin/busybox 50
+	update-alternatives --install /usr/bin/mesg mesg /bin/busybox 50
+	update-alternatives --install /usr/sbin/add-shell add-shell /bin/busybox 50
+	update-alternatives --install /usr/sbin/remove-shell remove-shell /bin/busybox 50
+	update-alternatives --install /usr/sbin/crond crond /bin/busybox 50
+	update-alternatives --install /usr/sbin/rfkill rfkill /bin/busybox 50
+	update-alternatives --install /bin/setserial setserial /bin/busybox 50
+	update-alternatives --install /usr/sbin/ubiattach ubiattach /bin/busybox 50
+	update-alternatives --install /usr/sbin/ubidetach ubidetach /bin/busybox 50
+	update-alternatives --install /usr/sbin/ubimkvol ubimkvol /bin/busybox 50
+	update-alternatives --install /usr/sbin/ubirmvol ubirmvol /bin/busybox 50
+	update-alternatives --install /usr/sbin/ubirsvol ubirsvol /bin/busybox 50
+	update-alternatives --install /usr/sbin/ubiupdatevol ubiupdatevol /bin/busybox 50
+	update-alternatives --install /usr/bin/wall wall /bin/busybox 50
+	update-alternatives --install /sbin/insmod insmod /bin/busybox 50
+	update-alternatives --install /sbin/lsmod lsmod /bin/busybox 50
+	update-alternatives --install /sbin/modprobe modprobe /bin/busybox 50
+	update-alternatives --install /sbin/rmmod rmmod /bin/busybox 50
+	update-alternatives --install /usr/sbin/nbd-client nbd-client /bin/busybox 50
+	update-alternatives --install /bin/ping ping /bin/busybox 50
+	update-alternatives --install /bin/ping6 ping6 /bin/busybox 50
+	update-alternatives --install /usr/bin/whois whois /bin/busybox 50
+	update-alternatives --install /bin/iostat iostat /bin/busybox 50
+	update-alternatives --install /usr/bin/lsof lsof /bin/busybox 50
+	update-alternatives --install /bin/mpstat mpstat /bin/busybox 50
+	update-alternatives --install /usr/bin/nmeter nmeter /bin/busybox 50
+	update-alternatives --install /usr/bin/pmap pmap /bin/busybox 50
+	update-alternatives --install /usr/sbin/powertop powertop /bin/busybox 50
+	update-alternatives --install /usr/bin/pstree pstree /bin/busybox 50
+	update-alternatives --install /usr/bin/pwdx pwdx /bin/busybox 50
+	update-alternatives --install /usr/bin/smemcap smemcap /bin/busybox 50
+	update-alternatives --install /bin/ash ash /bin/busybox 50
+	update-alternatives --install /bin/sh sh /bin/busybox 50
+	update-alternatives --install /bin/cttyhack cttyhack /bin/busybox 50
+	update-alternatives --install /bin/hush hush /bin/busybox 50
+	update-alternatives --install /sbin/blockdev blockdev /bin/busybox 50
+	update-alternatives --install /bin/fatattr fatattr /bin/busybox 50
+	update-alternatives --install /sbin/fstrim fstrim /bin/busybox 50
+	update-alternatives --install /sbin/mdev mdev /bin/busybox 50
+	update-alternatives --install /bin/rev rev /bin/busybox 50
+	update-alternatives --install /usr/bin/[ lbracket /bin/busybox 50
+	update-alternatives --install /usr/bin/[[ [[ /bin/busybox 50
+	update-alternatives --install /sbin/acpid acpid /bin/busybox 50
+	update-alternatives --install /usr/sbin/addgroup addgroup /bin/busybox 50
+	update-alternatives --install /usr/sbin/adduser adduser /bin/busybox 50
+	update-alternatives --install /sbin/adjtimex adjtimex /bin/busybox 50
+	update-alternatives --install /sbin/arp arp /bin/busybox 50
+	update-alternatives --install /usr/sbin/arping arping /bin/busybox 50
+	update-alternatives --install /usr/bin/basename basename /bin/busybox 50
+	update-alternatives --install /usr/bin/beep beep /bin/busybox 50
+	update-alternatives --install /sbin/blkid blkid /bin/busybox 50
+	update-alternatives --install /usr/sbin/brctl brctl /bin/busybox 50
+	update-alternatives --install /usr/bin/cal cal /bin/busybox 50
+	update-alternatives --install /bin/cat cat /bin/busybox 50
+	update-alternatives --install /bin/catv catv /bin/busybox 50
+	update-alternatives --install /usr/sbin/chat chat /bin/busybox 50
+	update-alternatives --install /bin/chattr chattr /bin/busybox 50
+	update-alternatives --install /bin/chgrp chgrp /bin/busybox 50
+	update-alternatives --install /bin/chmod chmod /bin/busybox 50
+	update-alternatives --install /bin/chown chown /bin/busybox 50
+	update-alternatives --install /usr/sbin/chpasswd chpasswd /bin/busybox 50
+	update-alternatives --install /usr/bin/chpst chpst /bin/busybox 50
+	update-alternatives --install /usr/sbin/chroot chroot /bin/busybox 50
+	update-alternatives --install /usr/bin/chrt chrt /bin/busybox 50
+	update-alternatives --install /usr/bin/chvt chvt /bin/busybox 50
+	update-alternatives --install /usr/bin/cksum cksum /bin/busybox 50
+	update-alternatives --install /usr/bin/clear clear /bin/busybox 50
+	update-alternatives --install /usr/bin/comm comm /bin/busybox 50
+	update-alternatives --install /bin/cp cp /bin/busybox 50
+	update-alternatives --install /usr/bin/crontab crontab /bin/busybox 50
+	update-alternatives --install /usr/bin/cryptpw cryptpw /bin/busybox 50
+	update-alternatives --install /usr/bin/cut cut /bin/busybox 50
+	update-alternatives --install /usr/bin/dc dc /bin/busybox 50
+	update-alternatives --install /bin/dd dd /bin/busybox 50
+	update-alternatives --install /usr/bin/deallocvt deallocvt /bin/busybox 50
+	update-alternatives --install /usr/sbin/delgroup delgroup /bin/busybox 50
+	update-alternatives --install /usr/sbin/deluser deluser /bin/busybox 50
+	update-alternatives --install /sbin/devmem devmem /bin/busybox 50
+	update-alternatives --install /bin/df df /bin/busybox 50
+	update-alternatives --install /usr/sbin/dhcprelay dhcprelay /bin/busybox 50
+	update-alternatives --install /usr/bin/dirname dirname /bin/busybox 50
+	update-alternatives --install /bin/dmesg dmesg /bin/busybox 50
+	update-alternatives --install /usr/sbin/dnsd dnsd /bin/busybox 50
+	update-alternatives --install /bin/dnsdomainname dnsdomainname /bin/busybox 50
+	update-alternatives --install /usr/bin/dos2unix dos2unix /bin/busybox 50
+	update-alternatives --install /usr/bin/du du /bin/busybox 50
+	update-alternatives --install /bin/dumpkmap dumpkmap /bin/busybox 50
+	update-alternatives --install /usr/bin/dumpleases dumpleases /bin/busybox 50
+	update-alternatives --install /bin/echo echo /bin/busybox 50
+	update-alternatives --install /usr/bin/eject eject /bin/busybox 50
+	update-alternatives --install /usr/bin/env env /bin/busybox 50
+	update-alternatives --install /usr/bin/envdir envdir /bin/busybox 50
+	update-alternatives --install /usr/bin/envuidgid envuidgid /bin/busybox 50
+	update-alternatives --install /usr/sbin/ether-wake ether-wake /bin/busybox 50
+	update-alternatives --install /usr/bin/expand expand /bin/busybox 50
+	update-alternatives --install /usr/bin/expr expr /bin/busybox 50
+	update-alternatives --install /usr/sbin/fakeidentd fakeidentd /bin/busybox 50
+	update-alternatives --install /bin/false false /bin/busybox 50
+	update-alternatives --install /usr/sbin/fbset fbset /bin/busybox 50
+	update-alternatives --install /sbin/fbsplash fbsplash /bin/busybox 50
+	update-alternatives --install /bin/fdflush fdflush /bin/busybox 50
+	update-alternatives --install /usr/sbin/fdformat fdformat /bin/busybox 50
+	update-alternatives --install /sbin/fdisk fdisk /bin/busybox 50
+	update-alternatives --install /usr/bin/fgconsole fgconsole /bin/busybox 50
+	update-alternatives --install /sbin/findfs findfs /bin/busybox 50
+	update-alternatives --install /usr/bin/flock flock /bin/busybox 50
+	update-alternatives --install /usr/bin/fold fold /bin/busybox 50
+	update-alternatives --install /usr/bin/free free /bin/busybox 50
+	update-alternatives --install /sbin/freeramdisk freeramdisk /bin/busybox 50
+	update-alternatives --install /sbin/fsck fsck /bin/busybox 50
+	update-alternatives --install /sbin/fsck.minix fsck.minix /bin/busybox 50
+	update-alternatives --install /bin/fsync fsync /bin/busybox 50
+	update-alternatives --install /usr/sbin/ftpd ftpd /bin/busybox 50
+	update-alternatives --install /usr/bin/ftpget ftpget /bin/busybox 50
+	update-alternatives --install /usr/bin/ftpput ftpput /bin/busybox 50
+	update-alternatives --install /usr/bin/fuser fuser /bin/busybox 50
+	update-alternatives --install /bin/getopt getopt /bin/busybox 50
+	update-alternatives --install /sbin/getty getty /bin/busybox 50
+	update-alternatives --install /usr/bin/hd hd /bin/busybox 50
+	update-alternatives --install /sbin/hdparm hdparm /bin/busybox 50
+	update-alternatives --install /usr/bin/head head /bin/busybox 50
+	update-alternatives --install /usr/bin/hexdump hexdump /bin/busybox 50
+	update-alternatives --install /bin/hostname hostname /bin/busybox 50
+	update-alternatives --install /usr/sbin/httpd httpd /bin/busybox 50
+	update-alternatives --install /sbin/hwclock hwclock /bin/busybox 50
+	update-alternatives --install /sbin/ifconfig ifconfig /bin/busybox 50
+	update-alternatives --install /sbin/ifdown ifdown /bin/busybox 50
+	update-alternatives --install /sbin/ifenslave ifenslave /bin/busybox 50
+	update-alternatives --install /usr/sbin/ifplugd ifplugd /bin/busybox 50
+	update-alternatives --install /sbin/ifup ifup /bin/busybox 50
+	update-alternatives --install /usr/sbin/inetd inetd /bin/busybox 50
+	update-alternatives --install /usr/bin/install install /bin/busybox 50
+	update-alternatives --install /bin/ionice ionice /bin/busybox 50
+	update-alternatives --install /sbin/ip ip /bin/busybox 50
+	update-alternatives --install /sbin/ipaddr ipaddr /bin/busybox 50
+	update-alternatives --install /bin/ipcalc ipcalc /bin/busybox 50
+	update-alternatives --install /usr/bin/ipcrm ipcrm /bin/busybox 50
+	update-alternatives --install /usr/bin/ipcs ipcs /bin/busybox 50
+	update-alternatives --install /sbin/iplink iplink /bin/busybox 50
+	update-alternatives --install /sbin/iproute iproute /bin/busybox 50
+	update-alternatives --install /sbin/iprule iprule /bin/busybox 50
+	update-alternatives --install /sbin/iptunnel iptunnel /bin/busybox 50
+	update-alternatives --install /bin/kbd_mode kbd_mode /bin/busybox 50
+	update-alternatives --install /bin/kill kill /bin/busybox 50
+	update-alternatives --install /usr/bin/killall killall /bin/busybox 50
+	update-alternatives --install /usr/sbin/killall5 killall5 /bin/busybox 50
+	update-alternatives --install /sbin/klogd klogd /bin/busybox 50
+	update-alternatives --install /usr/bin/last last /bin/busybox 50
+	update-alternatives --install /usr/bin/less less /bin/busybox 50
+	update-alternatives --install /bin/linux32 linux32 /bin/busybox 50
+	update-alternatives --install /bin/linux64 linux64 /bin/busybox 50
+	update-alternatives --install /bin/ln ln /bin/busybox 50
+	update-alternatives --install /usr/sbin/loadfont loadfont /bin/busybox 50
+	update-alternatives --install /sbin/loadkmap loadkmap /bin/busybox 50
+	update-alternatives --install /usr/bin/logger logger /bin/busybox 50
+	update-alternatives --install /bin/login login /bin/busybox 50
+	update-alternatives --install /usr/bin/logname logname /bin/busybox 50
+	update-alternatives --install /sbin/logread logread /bin/busybox 50
+	update-alternatives --install /sbin/losetup losetup /bin/busybox 50
+	update-alternatives --install /usr/sbin/lpd lpd /bin/busybox 50
+	update-alternatives --install /usr/bin/lpq lpq /bin/busybox 50
+	update-alternatives --install /usr/bin/lpr lpr /bin/busybox 50
+	update-alternatives --install /bin/ls ls /bin/busybox 50
+	update-alternatives --install /bin/lsattr lsattr /bin/busybox 50
+	update-alternatives --install /usr/bin/lspci lspci /bin/busybox 50
+	update-alternatives --install /usr/bin/lsusb lsusb /bin/busybox 50
+	update-alternatives --install /sbin/makedevs makedevs /bin/busybox 50
+	update-alternatives --install /bin/makemime makemime /bin/busybox 50
+	update-alternatives --install /usr/bin/man man /bin/busybox 50
+	update-alternatives --install /usr/bin/md5sum md5sum /bin/busybox 50
+	update-alternatives --install /usr/bin/microcom microcom /bin/busybox 50
+	update-alternatives --install /bin/mkdir mkdir /bin/busybox 50
+	update-alternatives --install /sbin/mkdosfs mkdosfs /bin/busybox 50
+	update-alternatives --install /sbin/mke2fs mke2fs /bin/busybox 50
+	update-alternatives --install /usr/bin/mkfifo mkfifo /bin/busybox 50
+	update-alternatives --install /sbin/mkfs.ext2 mkfs.ext2 /bin/busybox 50
+	update-alternatives --install /sbin/mkfs.minix mkfs.minix /bin/busybox 50
+	update-alternatives --install /sbin/mkfs.vfat mkfs.vfat /bin/busybox 50
+	update-alternatives --install /bin/mknod mknod /bin/busybox 50
+	update-alternatives --install /usr/bin/mkpasswd mkpasswd /bin/busybox 50
+	update-alternatives --install /sbin/mkswap mkswap /bin/busybox 50
+	update-alternatives --install /bin/mktemp mktemp /bin/busybox 50
+	update-alternatives --install /bin/more more /bin/busybox 50
+	update-alternatives --install /bin/mount mount /bin/busybox 50
+	update-alternatives --install /bin/mountpoint mountpoint /bin/busybox 50
+	update-alternatives --install /bin/mt mt /bin/busybox 50
+	update-alternatives --install /bin/mv mv /bin/busybox 50
+	update-alternatives --install /sbin/nameif nameif /bin/busybox 50
+	update-alternatives --install /usr/bin/nc nc /bin/busybox 50
+	update-alternatives --install /bin/netstat netstat /bin/busybox 50
+	update-alternatives --install /bin/nice nice /bin/busybox 50
+	update-alternatives --install /usr/bin/nohup nohup /bin/busybox 50
+	update-alternatives --install /usr/bin/nslookup nslookup /bin/busybox 50
+	update-alternatives --install /usr/sbin/ntpd ntpd /bin/busybox 50
+	update-alternatives --install /usr/bin/od od /bin/busybox 50
+	update-alternatives --install /usr/bin/openvt openvt /bin/busybox 50
+	update-alternatives --install /usr/bin/passwd passwd /bin/busybox 50
+	update-alternatives --install /usr/bin/pgrep pgrep /bin/busybox 50
+	update-alternatives --install /bin/pidof pidof /bin/busybox 50
+	update-alternatives --install /bin/pipe_progress pipe_progress /bin/busybox 50
+	update-alternatives --install /sbin/pivot_root pivot_root /bin/busybox 50
+	update-alternatives --install /usr/bin/pkill pkill /bin/busybox 50
+	update-alternatives --install /usr/sbin/popmaildir popmaildir /bin/busybox 50
+	update-alternatives --install /bin/printenv printenv /bin/busybox 50
+	update-alternatives --install /usr/bin/printf printf /bin/busybox 50
+	update-alternatives --install /bin/ps ps /bin/busybox 50
+	update-alternatives --install /usr/bin/pscan pscan /bin/busybox 50
+	update-alternatives --install /bin/pwd pwd /bin/busybox 50
+	update-alternatives --install /sbin/raidautorun raidautorun /bin/busybox 50
+	update-alternatives --install /usr/sbin/rdate rdate /bin/busybox 50
+	update-alternatives --install /usr/sbin/rdev rdev /bin/busybox 50
+	update-alternatives --install /usr/sbin/readahead readahead /bin/busybox 50
+	update-alternatives --install /usr/bin/readlink readlink /bin/busybox 50
+	update-alternatives --install /usr/sbin/readprofile readprofile /bin/busybox 50
+	update-alternatives --install /usr/bin/realpath realpath /bin/busybox 50
+	update-alternatives --install /bin/reformime reformime /bin/busybox 50
+	update-alternatives --install /usr/bin/renice renice /bin/busybox 50
+	update-alternatives --install /usr/bin/reset reset /bin/busybox 50
+	update-alternatives --install /usr/bin/resize resize /bin/busybox 50
+	update-alternatives --install /bin/rm rm /bin/busybox 50
+	update-alternatives --install /bin/rmdir rmdir /bin/busybox 50
+	update-alternatives --install /sbin/route route /bin/busybox 50
+	update-alternatives --install /usr/sbin/rtcwake rtcwake /bin/busybox 50
+	update-alternatives --install /bin/run-parts run-parts /bin/busybox 50
+	update-alternatives --install /sbin/runlevel runlevel /bin/busybox 50
+	update-alternatives --install /usr/bin/runsv runsv /bin/busybox 50
+	update-alternatives --install /usr/bin/runsvdir runsvdir /bin/busybox 50
+	update-alternatives --install /usr/bin/rx rx /bin/busybox 50
+	update-alternatives --install /usr/bin/script script /bin/busybox 50
+	update-alternatives --install /bin/scriptreplay scriptreplay /bin/busybox 50
+	update-alternatives --install /usr/sbin/sendmail sendmail /bin/busybox 50
+	update-alternatives --install /usr/bin/seq seq /bin/busybox 50
+	update-alternatives --install /bin/setarch setarch /bin/busybox 50
+	update-alternatives --install /sbin/setconsole setconsole /bin/busybox 50
+	update-alternatives --install /usr/sbin/setfont setfont /bin/busybox 50
+	update-alternatives --install /usr/bin/setkeycodes setkeycodes /bin/busybox 50
+	update-alternatives --install /usr/sbin/setlogcons setlogcons /bin/busybox 50
+	update-alternatives --install /usr/bin/setsid setsid /bin/busybox 50
+	update-alternatives --install /usr/bin/setuidgid setuidgid /bin/busybox 50
+	update-alternatives --install /usr/bin/sha1sum sha1sum /bin/busybox 50
+	update-alternatives --install /usr/bin/sha3sum sha3sum /bin/busybox 50
+	update-alternatives --install /usr/bin/sha256sum sha256sum /bin/busybox 50
+	update-alternatives --install /usr/bin/sha512sum sha512sum /bin/busybox 50
+	update-alternatives --install /usr/bin/showkey showkey /bin/busybox 50
+	update-alternatives --install /sbin/slattach slattach /bin/busybox 50
+	update-alternatives --install /bin/sleep sleep /bin/busybox 50
+	update-alternatives --install /usr/bin/softlimit softlimit /bin/busybox 50
+	update-alternatives --install /usr/bin/sort sort /bin/busybox 50
+	update-alternatives --install /usr/bin/split split /bin/busybox 50
+	update-alternatives --install /sbin/start-stop-daemon start-stop-daemon /bin/busybox 50
+	update-alternatives --install /bin/stat stat /bin/busybox 50
+	update-alternatives --install /usr/bin/strings strings /bin/busybox 50
+	update-alternatives --install /bin/stty stty /bin/busybox 50
+	update-alternatives --install /bin/su su /bin/busybox 50
+	update-alternatives --install /sbin/sulogin sulogin /bin/busybox 50
+	update-alternatives --install /usr/bin/sum sum /bin/busybox 50
+	update-alternatives --install /usr/bin/sv sv /bin/busybox 50
+	update-alternatives --install /usr/sbin/svlogd svlogd /bin/busybox 50
+	update-alternatives --install /sbin/swapoff swapoff /bin/busybox 50
+	update-alternatives --install /sbin/swapon swapon /bin/busybox 50
+	update-alternatives --install /sbin/switch_root switch_root /bin/busybox 50
+	update-alternatives --install /bin/sync sync /bin/busybox 50
+	update-alternatives --install /sbin/sysctl sysctl /bin/busybox 50
+	update-alternatives --install /sbin/syslogd syslogd /bin/busybox 50
+	update-alternatives --install /usr/bin/tac tac /bin/busybox 50
+	update-alternatives --install /usr/bin/tail tail /bin/busybox 50
+	update-alternatives --install /usr/bin/tcpsvd tcpsvd /bin/busybox 50
+	update-alternatives --install /usr/bin/tee tee /bin/busybox 50
+	update-alternatives --install /usr/bin/telnet telnet /bin/busybox 50
+	update-alternatives --install /usr/sbin/telnetd telnetd /bin/busybox 50
+	update-alternatives --install /usr/bin/test test /bin/busybox 50
+	update-alternatives --install /usr/bin/tftp tftp /bin/busybox 50
+	update-alternatives --install /usr/sbin/tftpd tftpd /bin/busybox 50
+	update-alternatives --install /usr/bin/time time /bin/busybox 50
+	update-alternatives --install /usr/bin/timeout timeout /bin/busybox 50
+	update-alternatives --install /usr/bin/top top /bin/busybox 50
+	update-alternatives --install /usr/bin/tr tr /bin/busybox 50
+	update-alternatives --install /usr/bin/traceroute traceroute /bin/busybox 50
+	update-alternatives --install /usr/bin/traceroute6 traceroute6 /bin/busybox 50
+	update-alternatives --install /bin/true true /bin/busybox 50
+	update-alternatives --install /usr/bin/tty tty /bin/busybox 50
+	update-alternatives --install /usr/bin/ttysize ttysize /bin/busybox 50
+	update-alternatives --install /sbin/tunctl tunctl /bin/busybox 50
+	update-alternatives --install /sbin/udhcpc udhcpc /bin/busybox 50
+	update-alternatives --install /usr/sbin/udhcpd udhcpd /bin/busybox 50
+	update-alternatives --install /usr/bin/udpsvd udpsvd /bin/busybox 50
+	update-alternatives --install /bin/umount umount /bin/busybox 50
+	update-alternatives --install /bin/uname uname /bin/busybox 50
+	update-alternatives --install /usr/bin/unexpand unexpand /bin/busybox 50
+	update-alternatives --install /usr/bin/uniq uniq /bin/busybox 50
+	update-alternatives --install /usr/bin/unix2dos unix2dos /bin/busybox 50
+	update-alternatives --install /usr/bin/uptime uptime /bin/busybox 50
+	update-alternatives --install /bin/usleep usleep /bin/busybox 50
+	update-alternatives --install /usr/bin/uudecode uudecode /bin/busybox 50
+	update-alternatives --install /usr/bin/uuencode uuencode /bin/busybox 50
+	update-alternatives --install /sbin/vconfig vconfig /bin/busybox 50
+	update-alternatives --install /usr/bin/vlock vlock /bin/busybox 50
+	update-alternatives --install /usr/bin/volname volname /bin/busybox 50
+	update-alternatives --install /bin/watch watch /bin/busybox 50
+	update-alternatives --install /sbin/watchdog watchdog /bin/busybox 50
+	update-alternatives --install /usr/bin/wc wc /bin/busybox 50
+	update-alternatives --install /usr/bin/wget wget /bin/busybox 50
+	update-alternatives --install /usr/bin/which which /bin/busybox 50
+	update-alternatives --install /usr/bin/whoami whoami /bin/busybox 50
+	update-alternatives --install /usr/bin/yes yes /bin/busybox 50
+	update-alternatives --install /sbin/zcip zcip /bin/busybox 50
+Name: shadow-securetty
+Name: net-snmp-mibs
+Name: boot-format-config
+Name: udev-rules-qoriq
+Name: pointercal
+Name: libppc
+Name: kernel-vmlinux
+Name: usbutils-ids
+Name: python-re
+Name: ncurses-terminfo-base
+Name: pciutils-ids
+Name: lttng-modules
+Name: merge-files
+Name: dhcp-server-config
+Name: glibc-gconv
+Name: libc6-dbg
+Name: openssl-conf
+Name: libc6
+postinstall scriptlet (using /bin/sh):
+# libc6 - postinst
+#!/bin/sh
+if [ x"$D" = "x" ]; then
+	if [ -x /sbin/ldconfig ]; then /sbin/ldconfig ; fi
+fi
+Name: ifenslave
+Name: iputils-tracepath6
+Name: lsof
+Name: util-linux-sfdisk
+Name: libtinfo5
+postinstall scriptlet (using /bin/sh):
+# libtinfo5 - postinst
+#!/bin/sh
+if [ x"$D" = "x" ]; then
+	if [ -x /sbin/ldconfig ]; then /sbin/ldconfig ; fi
+fi
+Name: setserial
+Name: testfloat
+Name: cantest
+Name: ethtool
+Name: glibc-gconv-iso8859-1
+Name: util-linux-mkfs
+Name: iputils-tracepath
+Name: ppp-oe
+Name: m4
+Name: trace-cmd
+Name: makedevs
+Name: pax
+Name: mdadm
+Name: boot-format
+Name: vlan
+Name: sudo
+Name: dosfstools
+Name: gdbserver
+Name: memstat
+Name: iozone3
+Name: vmcore-dmesg
+Name: memtester
+Name: pstree
+Name: bash
+postinstall scriptlet (using /bin/sh):
+# bash - postinst
+	grep -q "^/bin/bash$" $D/etc/shells || echo /bin/bash >> $D/etc/shells
+	update-alternatives --install /bin/sh sh /bin/bash 100
+Name: ncurses
+Name: sysvinit-inittab
+postinstall scriptlet (using /bin/sh):
+# sysvinit-inittab - postinst
+# run this on the target
+if [ "x$D" = "x" ] && [ -e /proc/consoles ]; then
+	tmp="115200;ttyS0 115200;ttyS1 115200;ttyEHV0"
+	for i in $tmp
+	do
+		j=`echo ${i} | sed s/^.*\;//g`
+		if [ -z "`grep ${j} /proc/consoles`" ]; then
+			sed -i /^.*${j}$/d /etc/inittab
+		fi
+	done
+	kill -HUP 1
+else
+	if [ "115200;ttyS0 115200;ttyS1 115200;ttyEHV0" = "" ]; then
+		exit 0
+	else
+		exit 1
+	fi
+fi
+Name: libc6-thread-db
+postinstall scriptlet (using /bin/sh):
+# libc6-thread-db - postinst
+#!/bin/sh
+if [ x"$D" = "x" ]; then
+	if [ -x /sbin/ldconfig ]; then /sbin/ldconfig ; fi
+fi
+Name: iptables
+postinstall scriptlet (using /bin/sh):
+# iptables - postinst
+#!/bin/sh
+if [ x"$D" = "x" ]; then
+	if [ -x /sbin/ldconfig ]; then /sbin/ldconfig ; fi
+fi
+Name: libtool
+Name: libpcap1
+postinstall scriptlet (using /bin/sh):
+# libpcap1 - postinst
+#!/bin/sh
+if [ x"$D" = "x" ]; then
+	if [ -x /sbin/ldconfig ]; then /sbin/ldconfig ; fi
+fi
+Name: libcap2
+postinstall scriptlet (using /bin/sh):
+# libcap2 - postinst
+#!/bin/sh
+if [ x"$D" = "x" ]; then
+	if [ -x /sbin/ldconfig ]; then /sbin/ldconfig ; fi
+fi
+Name: libnl-3-200
+postinstall scriptlet (using /bin/sh):
+# libnl-3-200 - postinst
+#!/bin/sh
+if [ x"$D" = "x" ]; then
+	if [ -x /sbin/ldconfig ]; then /sbin/ldconfig ; fi
+fi
+Name: liblzo2-2
+postinstall scriptlet (using /bin/sh):
+# liblzo2-2 - postinst
+#!/bin/sh
+if [ x"$D" = "x" ]; then
+	if [ -x /sbin/ldconfig ]; then /sbin/ldconfig ; fi
+fi
+Name: libffi6
+postinstall scriptlet (using /bin/sh):
+# libffi6 - postinst
+#!/bin/sh
+if [ x"$D" = "x" ]; then
+	if [ -x /sbin/ldconfig ]; then /sbin/ldconfig ; fi
+fi
+Name: libtalloc2
+postinstall scriptlet (using /bin/sh):
+# libtalloc2 - postinst
+#!/bin/sh
+if [ x"$D" = "x" ]; then
+	if [ -x /sbin/ldconfig ]; then /sbin/ldconfig ; fi
+fi
+Name: radiusclient-ng
+postinstall scriptlet (using /bin/sh):
+# radiusclient-ng - postinst
+#!/bin/sh
+if [ x"$D" = "x" ]; then
+	if [ -x /sbin/ldconfig ]; then /sbin/ldconfig ; fi
+fi
+Name: udev-cache
+postinstall scriptlet (using /bin/sh):
+# udev-cache - postinst
+#!/bin/sh
+if type update-rc.d >/dev/null 2>/dev/null; then
+	if [ -n "$D" ]; then
+		OPT="-r $D"
+	else
+		OPT="-s"
+	fi
+	update-rc.d $OPT udev-cache start 36 S .
+fi
+Name: libutempter0
+postinstall scriptlet (using /bin/sh):
+# libutempter0 - postinst
+#!/bin/sh
+if [ x"$D" = "x" ]; then
+	if [ -x /sbin/ldconfig ]; then /sbin/ldconfig ; fi
+fi
+Name: netperf
+postinstall scriptlet (using /bin/sh):
+# netperf - postinst
+#!/bin/sh
+if type update-rc.d >/dev/null 2>/dev/null; then
+	if [ -n "$D" ]; then
+		OPT="-r $D"
+	else
+		OPT="-s"
+	fi
+	update-rc.d $OPT netperf defaults
+fi
+Name: libpixman-1-0
+postinstall scriptlet (using /bin/sh):
+# libpixman-1-0 - postinst
+#!/bin/sh
+if [ x"$D" = "x" ]; then
+	if [ -x /sbin/ldconfig ]; then /sbin/ldconfig ; fi
+fi
+Name: libgdbm4
+postinstall scriptlet (using /bin/sh):
+# libgdbm4 - postinst
+#!/bin/sh
+if [ x"$D" = "x" ]; then
+	if [ -x /sbin/ldconfig ]; then /sbin/ldconfig ; fi
+fi
+Name: libjpeg8
+postinstall scriptlet (using /bin/sh):
+# libjpeg8 - postinst
+#!/bin/sh
+if [ x"$D" = "x" ]; then
+	if [ -x /sbin/ldconfig ]; then /sbin/ldconfig ; fi
+fi
+Name: update-alternatives-opkg
+Name: libsqlite0
+postinstall scriptlet (using /bin/sh):
+# libsqlite0 - postinst
+#!/bin/sh
+if [ x"$D" = "x" ]; then
+	if [ -x /sbin/ldconfig ]; then /sbin/ldconfig ; fi
+fi
+Name: libperl5
+postinstall scriptlet (using /bin/sh):
+# libperl5 - postinst
+#!/bin/sh
+if [ x"$D" = "x" ]; then
+	if [ -x /sbin/ldconfig ]; then /sbin/ldconfig ; fi
+fi
+Name: db
+postinstall scriptlet (using /bin/sh):
+# db - postinst
+#!/bin/sh
+if [ x"$D" = "x" ]; then
+	if [ -x /sbin/ldconfig ]; then /sbin/ldconfig ; fi
+fi
+Name: libnet9
+postinstall scriptlet (using /bin/sh):
+# libnet9 - postinst
+#!/bin/sh
+if [ x"$D" = "x" ]; then
+	if [ -x /sbin/ldconfig ]; then /sbin/ldconfig ; fi
+fi
+Name: minicom
+Name: libdaemon0
+postinstall scriptlet (using /bin/sh):
+# libdaemon0 - postinst
+#!/bin/sh
+if [ x"$D" = "x" ]; then
+	if [ -x /sbin/ldconfig ]; then /sbin/ldconfig ; fi
+fi
+Name: libpam
+postinstall scriptlet (using /bin/sh):
+# libpam - postinst
+#!/bin/sh
+if [ x"$D" = "x" ]; then
+	if [ -x /sbin/ldconfig ]; then /sbin/ldconfig ; fi
+fi
+Name: libaio1
+postinstall scriptlet (using /bin/sh):
+# libaio1 - postinst
+#!/bin/sh
+if [ x"$D" = "x" ]; then
+	if [ -x /sbin/ldconfig ]; then /sbin/ldconfig ; fi
+fi
+Name: ed
+Name: libxdmcp6
+postinstall scriptlet (using /bin/sh):
+# libxdmcp6 - postinst
+#!/bin/sh
+if [ x"$D" = "x" ]; then
+	if [ -x /sbin/ldconfig ]; then /sbin/ldconfig ; fi
+fi
+Name: libedit0
+postinstall scriptlet (using /bin/sh):
+# libedit0 - postinst
+#!/bin/sh
+if [ x"$D" = "x" ]; then
+	if [ -x /sbin/ldconfig ]; then /sbin/ldconfig ; fi
+fi
+Name: libsysfs2
+postinstall scriptlet (using /bin/sh):
+# libsysfs2 - postinst
+#!/bin/sh
+if [ x"$D" = "x" ]; then
+	if [ -x /sbin/ldconfig ]; then /sbin/ldconfig ; fi
+fi
+Name: libelf1
+postinstall scriptlet (using /bin/sh):
+# libelf1 - postinst
+#!/bin/sh
+if [ x"$D" = "x" ]; then
+	if [ -x /sbin/ldconfig ]; then /sbin/ldconfig ; fi
+fi
+Name: libsctp1
+postinstall scriptlet (using /bin/sh):
+# libsctp1 - postinst
+#!/bin/sh
+if [ x"$D" = "x" ]; then
+	if [ -x /sbin/ldconfig ]; then /sbin/ldconfig ; fi
+fi
+Name: libexpat1
+postinstall scriptlet (using /bin/sh):
+# libexpat1 - postinst
+#!/bin/sh
+if [ x"$D" = "x" ]; then
+	if [ -x /sbin/ldconfig ]; then /sbin/ldconfig ; fi
+fi
+Name: libfreetype6
+postinstall scriptlet (using /bin/sh):
+# libfreetype6 - postinst
+#!/bin/sh
+if [ x"$D" = "x" ]; then
+	if [ -x /sbin/ldconfig ]; then /sbin/ldconfig ; fi
+fi
+Name: strace
+Name: busybox-udhcpc
+Name: redis
+postinstall scriptlet (using /bin/sh):
+# redis - postinst
+#!/bin/sh
+if type update-rc.d >/dev/null 2>/dev/null; then
+	if [ -n "$D" ]; then
+		OPT="-r $D"
+	else
+		OPT="-s"
+	fi
+	update-rc.d $OPT redis-server defaults 87
+fi
+Name: tzdata
+postinstall scriptlet (using /bin/sh):
+# tzdata - postinst
+	etc_lt="$D/etc/localtime"
+	src="$D/etc/timezone"
+
+	if [ -e ${src} ] ; then
+		tz=$(sed -e 's:#.*::' -e 's:[[:space:]]*::g' -e '/^$/d' "${src}")
+	fi
+
+	if [ -z "${tz}" ] ; then
+		exit 0
+	fi
+
+	if [ ! -e "$D/usr/share/zoneinfo/${tz}" ] ; then
+		echo "You have an invalid TIMEZONE setting in ${src}"
+		echo "Your ${etc_lt} has been reset to Universal; enjoy!"
+		tz="Universal"
+		echo "Updating ${etc_lt} with $D/usr/share/zoneinfo/${tz}"
+		if [ -L ${etc_lt} ] ; then
+			rm -f "${etc_lt}"
+		fi
+		ln -s "/usr/share/zoneinfo/${tz}" "${etc_lt}"
+	fi
+Name: libgcc1
+postinstall scriptlet (using /bin/sh):
+# libgcc1 - postinst
+#!/bin/sh
+if [ x"$D" = "x" ]; then
+	if [ -x /sbin/ldconfig ]; then /sbin/ldconfig ; fi
+fi
+Name: libevtlog0
+postinstall scriptlet (using /bin/sh):
+# libevtlog0 - postinst
+#!/bin/sh
+if [ x"$D" = "x" ]; then
+	if [ -x /sbin/ldconfig ]; then /sbin/ldconfig ; fi
+fi
+Name: libwrap0
+postinstall scriptlet (using /bin/sh):
+# libwrap0 - postinst
+#!/bin/sh
+if [ x"$D" = "x" ]; then
+	if [ -x /sbin/ldconfig ]; then /sbin/ldconfig ; fi
+fi
+Name: sysstat
+postinstall scriptlet (using /bin/sh):
+# sysstat - postinst
+if [ -n "$D" ]; then
+                exit 0
+        fi
+        if [ -e /etc/init.d/populate-volatile.sh ]; then
+                /etc/init.d/populate-volatile.sh update
+        fi
+Name: libnfsidmap0
+postinstall scriptlet (using /bin/sh):
+# libnfsidmap0 - postinst
+#!/bin/sh
+if [ x"$D" = "x" ]; then
+	if [ -x /sbin/ldconfig ]; then /sbin/ldconfig ; fi
+fi
+Name: libz1
+postinstall scriptlet (using /bin/sh):
+# libz1 - postinst
+#!/bin/sh
+if [ x"$D" = "x" ]; then
+	if [ -x /sbin/ldconfig ]; then /sbin/ldconfig ; fi
+fi
+Name: libgpg-error0
+postinstall scriptlet (using /bin/sh):
+# libgpg-error0 - postinst
+#!/bin/sh
+if [ x"$D" = "x" ]; then
+	if [ -x /sbin/ldconfig ]; then /sbin/ldconfig ; fi
+fi
+Name: libpcre1
+postinstall scriptlet (using /bin/sh):
+# libpcre1 - postinst
+#!/bin/sh
+if [ x"$D" = "x" ]; then
+	if [ -x /sbin/ldconfig ]; then /sbin/ldconfig ; fi
+fi
+Name: libe2p2
+postinstall scriptlet (using /bin/sh):
+# libe2p2 - postinst
+#!/bin/sh
+if [ x"$D" = "x" ]; then
+	if [ -x /sbin/ldconfig ]; then /sbin/ldconfig ; fi
+fi
+Name: mtd-utils
+Name: ca-certificates
+postinstall scriptlet (using /bin/sh):
+# ca-certificates - postinst
+SYSROOT="$D" update-ca-certificates
+Name: libudev0
+postinstall scriptlet (using /bin/sh):
+# libudev0 - postinst
+#!/bin/sh
+if [ x"$D" = "x" ]; then
+	if [ -x /sbin/ldconfig ]; then /sbin/ldconfig ; fi
+fi
+Name: flex
+postinstall scriptlet (using /bin/sh):
+# flex - postinst
+#!/bin/sh
+if [ x"$D" = "x" ]; then
+	if [ -x /sbin/ldconfig ]; then /sbin/ldconfig ; fi
+fi
+Name: liblzma5
+postinstall scriptlet (using /bin/sh):
+# liblzma5 - postinst
+#!/bin/sh
+if [ x"$D" = "x" ]; then
+	if [ -x /sbin/ldconfig ]; then /sbin/ldconfig ; fi
+fi
+Name: rng-tools
+postinstall scriptlet (using /bin/sh):
+# rng-tools - postinst
+#!/bin/sh
+if type update-rc.d >/dev/null 2>/dev/null; then
+	if [ -n "$D" ]; then
+		OPT="-r $D"
+	else
+		OPT="-s"
+	fi
+	update-rc.d $OPT rng-tools start 30 S . stop 30 0 6 1 .
+fi
+Name: run-postinsts
+postinstall scriptlet (using /bin/sh):
+# run-postinsts - postinst
+#!/bin/sh
+if type update-rc.d >/dev/null 2>/dev/null; then
+	if [ -n "$D" ]; then
+		OPT="-r $D"
+	else
+		OPT="-s"
+	fi
+	update-rc.d $OPT run-postinsts start 99 S .
+fi
+Name: modutils-initscripts
+postinstall scriptlet (using /bin/sh):
+# modutils-initscripts - postinst
+	if false; then
+		if [ -n "$D" ]; then
+			OPTS="--root=$D"
+		fi
+		systemctl $OPTS mask modutils.service
+	fi
+if type update-rc.d >/dev/null 2>/dev/null; then
+	if [ -n "$D" ]; then
+		OPT="-r $D"
+	else
+		OPT="-s"
+	fi
+	update-rc.d $OPT modutils.sh start 05 S .
+fi
+Name: libncursesw5
+postinstall scriptlet (using /bin/sh):
+# libncursesw5 - postinst
+#!/bin/sh
+if [ x"$D" = "x" ]; then
+	if [ -x /sbin/ldconfig ]; then /sbin/ldconfig ; fi
+fi
+Name: libbz2-0
+postinstall scriptlet (using /bin/sh):
+# libbz2-0 - postinst
+#!/bin/sh
+if [ x"$D" = "x" ]; then
+	if [ -x /sbin/ldconfig ]; then /sbin/ldconfig ; fi
+fi
+Name: libsensors4
+postinstall scriptlet (using /bin/sh):
+# libsensors4 - postinst
+#!/bin/sh
+if [ x"$D" = "x" ]; then
+	if [ -x /sbin/ldconfig ]; then /sbin/ldconfig ; fi
+fi
+Name: libtirpc1
+postinstall scriptlet (using /bin/sh):
+# libtirpc1 - postinst
+#!/bin/sh
+if [ x"$D" = "x" ]; then
+	if [ -x /sbin/ldconfig ]; then /sbin/ldconfig ; fi
+fi
+Name: kernel-3.12.37-rt51+g43cecda
+postinstall scriptlet (using /bin/sh):
+# kernel-3.12.37-rt51+g43cecda - postinst
+	if [ ! -e "$D/lib/modules/3.12.37-rt51+g43cecda" ]; then
+		mkdir -p $D/lib/modules/3.12.37-rt51+g43cecda
+	fi
+	if [ -n "$D" ]; then
+		depmodwrapper -a -b $D 3.12.37-rt51+g43cecda
+	else
+		depmod -a 3.12.37-rt51+g43cecda
+	fi
+Name: libxau6
+postinstall scriptlet (using /bin/sh):
+# libxau6 - postinst
+#!/bin/sh
+if [ x"$D" = "x" ]; then
+	if [ -x /sbin/ldconfig ]; then /sbin/ldconfig ; fi
+fi
+Name: libsqlite3-0
+postinstall scriptlet (using /bin/sh):
+# libsqlite3-0 - postinst
+#!/bin/sh
+if [ x"$D" = "x" ]; then
+	if [ -x /sbin/ldconfig ]; then /sbin/ldconfig ; fi
+fi
+Name: libgettextlib
+postinstall scriptlet (using /bin/sh):
+# libgettextlib - postinst
+#!/bin/sh
+if [ x"$D" = "x" ]; then
+	if [ -x /sbin/ldconfig ]; then /sbin/ldconfig ; fi
+fi
+Name: tslib-conf
+Name: xfsprogs-fsck
+Name: libsmartcols1
+postinstall scriptlet (using /bin/sh):
+# libsmartcols1 - postinst
+#!/bin/sh
+if [ x"$D" = "x" ]; then
+	if [ -x /sbin/ldconfig ]; then /sbin/ldconfig ; fi
+fi
+Name: update-rc.d
+Name: base-passwd
+Name: libdbus-1-3
+postinstall scriptlet (using /bin/sh):
+# libdbus-1-3 - postinst
+#!/bin/sh
+if [ x"$D" = "x" ]; then
+	if [ -x /sbin/ldconfig ]; then /sbin/ldconfig ; fi
+fi
+Name: libpopt0
+postinstall scriptlet (using /bin/sh):
+# libpopt0 - postinst
+#!/bin/sh
+if [ x"$D" = "x" ]; then
+	if [ -x /sbin/ldconfig ]; then /sbin/ldconfig ; fi
+fi
+Name: init-ifupdown
+postinstall scriptlet (using /bin/sh):
+# init-ifupdown - postinst
+#!/bin/sh
+if type update-rc.d >/dev/null 2>/dev/null; then
+	if [ -n "$D" ]; then
+		OPT="-r $D"
+	else
+		OPT="-s"
+	fi
+	update-rc.d $OPT networking start 01 2 3 4 5 . stop 80 0 6 1 .
+fi
+Name: base-files
+Name: nspr
+postinstall scriptlet (using /bin/sh):
+# nspr - postinst
+#!/bin/sh
+if [ x"$D" = "x" ]; then
+	if [ -x /sbin/ldconfig ]; then /sbin/ldconfig ; fi
+fi
+Name: libcom-err2
+postinstall scriptlet (using /bin/sh):
+# libcom-err2 - postinst
+#!/bin/sh
+if [ x"$D" = "x" ]; then
+	if [ -x /sbin/ldconfig ]; then /sbin/ldconfig ; fi
+fi
+Name: libfuse2
+postinstall scriptlet (using /bin/sh):
+# libfuse2 - postinst
+#!/bin/sh
+if [ x"$D" = "x" ]; then
+	if [ -x /sbin/ldconfig ]; then /sbin/ldconfig ; fi
+fi
+Name: libreadline6
+postinstall scriptlet (using /bin/sh):
+# libreadline6 - postinst
+#!/bin/sh
+if [ x"$D" = "x" ]; then
+	if [ -x /sbin/ldconfig ]; then /sbin/ldconfig ; fi
+fi
+Name: libuuid1
+postinstall scriptlet (using /bin/sh):
+# libuuid1 - postinst
+#!/bin/sh
+if [ x"$D" = "x" ]; then
+	if [ -x /sbin/ldconfig ]; then /sbin/ldconfig ; fi
+fi
+Name: tipcutils
+Name: libossp-uuid16
+postinstall scriptlet (using /bin/sh):
+# libossp-uuid16 - postinst
+#!/bin/sh
+if [ x"$D" = "x" ]; then
+	if [ -x /sbin/ldconfig ]; then /sbin/ldconfig ; fi
+fi
+Name: daemontools
+Name: libbsd0
+postinstall scriptlet (using /bin/sh):
+# libbsd0 - postinst
+#!/bin/sh
+if [ x"$D" = "x" ]; then
+	if [ -x /sbin/ldconfig ]; then /sbin/ldconfig ; fi
+fi
+Name: libattr1
+postinstall scriptlet (using /bin/sh):
+# libattr1 - postinst
+#!/bin/sh
+if [ x"$D" = "x" ]; then
+	if [ -x /sbin/ldconfig ]; then /sbin/ldconfig ; fi
+fi
+Name: libltdl7
+postinstall scriptlet (using /bin/sh):
+# libltdl7 - postinst
+#!/bin/sh
+if [ x"$D" = "x" ]; then
+	if [ -x /sbin/ldconfig ]; then /sbin/ldconfig ; fi
+fi
+Name: busybox-hwclock
+postinstall scriptlet (using /bin/sh):
+# busybox-hwclock - postinst
+#!/bin/sh
+if type update-rc.d >/dev/null 2>/dev/null; then
+	if [ -n "$D" ]; then
+		OPT="-r $D"
+	else
+		OPT="-s"
+	fi
+	update-rc.d $OPT hwclock.sh defaults
+fi
+Name: tzcode
+Name: libidn11
+postinstall scriptlet (using /bin/sh):
+# libidn11 - postinst
+#!/bin/sh
+if [ x"$D" = "x" ]; then
+	if [ -x /sbin/ldconfig ]; then /sbin/ldconfig ; fi
+fi
+Name: libcrypto1.0.0
+postinstall scriptlet (using /bin/sh):
+# libcrypto1.0.0 - postinst
+#!/bin/sh
+if [ x"$D" = "x" ]; then
+	if [ -x /sbin/ldconfig ]; then /sbin/ldconfig ; fi
+fi
+Name: libpython2.7-1.0
+postinstall scriptlet (using /bin/sh):
+# libpython2.7-1.0 - postinst
+#!/bin/sh
+if [ x"$D" = "x" ]; then
+	if [ -x /sbin/ldconfig ]; then /sbin/ldconfig ; fi
+fi
+Name: liburcu
+postinstall scriptlet (using /bin/sh):
+# liburcu - postinst
+#!/bin/sh
+if [ x"$D" = "x" ]; then
+	if [ -x /sbin/ldconfig ]; then /sbin/ldconfig ; fi
+fi
+Name: libavahi-common3
+postinstall scriptlet (using /bin/sh):
+# libavahi-common3 - postinst
+#!/bin/sh
+if [ x"$D" = "x" ]; then
+	if [ -x /sbin/ldconfig ]; then /sbin/ldconfig ; fi
+fi
+Name: libhandle1
+postinstall scriptlet (using /bin/sh):
+# libhandle1 - postinst
+#!/bin/sh
+if [ x"$D" = "x" ]; then
+	if [ -x /sbin/ldconfig ]; then /sbin/ldconfig ; fi
+fi
+Name: libgmp10
+postinstall scriptlet (using /bin/sh):
+# libgmp10 - postinst
+#!/bin/sh
+if [ x"$D" = "x" ]; then
+	if [ -x /sbin/ldconfig ]; then /sbin/ldconfig ; fi
+fi
+Name: libusb-1.0-0
+postinstall scriptlet (using /bin/sh):
+# libusb-1.0-0 - postinst
+#!/bin/sh
+if [ x"$D" = "x" ]; then
+	if [ -x /sbin/ldconfig ]; then /sbin/ldconfig ; fi
+fi
+Name: libncurses5
+postinstall scriptlet (using /bin/sh):
+# libncurses5 - postinst
+#!/bin/sh
+if [ x"$D" = "x" ]; then
+	if [ -x /sbin/ldconfig ]; then /sbin/ldconfig ; fi
+fi
+Name: tcsh
+postinstall scriptlet (using /bin/sh):
+# tcsh - postinst
+#!/bin/sh -e
+echo /usr/bin/tcsh >> $D/etc/shells
+Name: ppp
+Name: iputils-clockdiff
+Name: iputils-arping
+Name: iputils-traceroute6
+Name: libnl-route-3-200
+postinstall scriptlet (using /bin/sh):
+# libnl-route-3-200 - postinst
+#!/bin/sh
+if [ x"$D" = "x" ]; then
+	if [ -x /sbin/ldconfig ]; then /sbin/ldconfig ; fi
+fi
+Name: inetutils-ping
+postinstall scriptlet (using /bin/sh):
+# inetutils-ping - postinst
+#!/bin/sh
+	update-alternatives --install /bin/ping ping /bin/ping.inetutils 80
+Name: inetutils-ifconfig
+postinstall scriptlet (using /bin/sh):
+# inetutils-ifconfig - postinst
+#!/bin/sh
+	update-alternatives --install /sbin/ifconfig ifconfig /sbin/ifconfig.inetutils 80
+Name: inetutils-ping6
+postinstall scriptlet (using /bin/sh):
+# inetutils-ping6 - postinst
+#!/bin/sh
+	update-alternatives --install /bin/ping6 ping6 /bin/ping6.inetutils 80
+Name: net-tools
+postinstall scriptlet (using /bin/sh):
+# net-tools - postinst
+#!/bin/sh
+	update-alternatives --install /sbin/arp arp /sbin/arp.net-tools 100
+	update-alternatives --install /sbin/ifconfig ifconfig /sbin/ifconfig.net-tools 100
+	update-alternatives --install /sbin/ipmaddr ipmaddr /sbin/ipmaddr.net-tools 100
+	update-alternatives --install /sbin/iptunnel iptunnel /sbin/iptunnel.net-tools 100
+	update-alternatives --install /sbin/mii-tool mii-tool /sbin/mii-tool.net-tools 100
+	update-alternatives --install /sbin/nameif nameif /sbin/nameif.net-tools 100
+	update-alternatives --install /sbin/plipconfig plipconfig /sbin/plipconfig.net-tools 100
+	update-alternatives --install /sbin/rarp rarp /sbin/rarp.net-tools 100
+	update-alternatives --install /sbin/route route /sbin/route.net-tools 100
+	update-alternatives --install /sbin/slattach slattach /sbin/slattach.net-tools 100
+	update-alternatives --install /bin/dnsdomainname dnsdomainname /bin/dnsdomainname.net-tools 100
+	update-alternatives --install /bin/domainname domainname /bin/domainname.net-tools 100
+	update-alternatives --install /bin/hostname hostname /bin/hostname.net-tools 100
+	update-alternatives --install /bin/netstat netstat /bin/netstat.net-tools 100
+	update-alternatives --install /bin/nisdomainname nisdomainname /bin/nisdomainname.net-tools 100
+	update-alternatives --install /bin/ypdomainname ypdomainname /bin/ypdomainname.net-tools 100
+Name: cpio
+postinstall scriptlet (using /bin/sh):
+# cpio - postinst
+#!/bin/sh
+	update-alternatives --install /bin/cpio cpio /bin/cpio.cpio 100
+Name: hdparm
+postinstall scriptlet (using /bin/sh):
+# hdparm - postinst
+#!/bin/sh
+	update-alternatives --install /sbin/hdparm hdparm /sbin/hdparm.hdparm 100
+Name: sed
+postinstall scriptlet (using /bin/sh):
+# sed - postinst
+#!/bin/sh
+	update-alternatives --install /bin/sed sed /bin/sed.sed 100
+Name: fbset
+postinstall scriptlet (using /bin/sh):
+# fbset - postinst
+#!/bin/sh
+	update-alternatives --install /usr/sbin/fbset fbset /usr/sbin/fbset.real 55
+Name: inetutils-tftp
+postinstall scriptlet (using /bin/sh):
+# inetutils-tftp - postinst
+#!/bin/sh
+	update-alternatives --install /usr/bin/tftp tftp /usr/bin/tftp.inetutils 80
+Name: inetutils-hostname
+postinstall scriptlet (using /bin/sh):
+# inetutils-hostname - postinst
+#!/bin/sh
+	update-alternatives --install /bin/hostname hostname /bin/hostname.inetutils 80
+Name: vim-tiny
+postinstall scriptlet (using /bin/sh):
+# vim-tiny - postinst
+#!/bin/sh
+	update-alternatives --install /bin/vi vi /usr/bin/vim.tiny 90
+	update-alternatives --install /usr/bin/vim vim /usr/bin/vim.tiny 90
+Name: killall
+postinstall scriptlet (using /bin/sh):
+# killall - postinst
+#!/bin/sh
+	update-alternatives --install /usr/bin/killall killall /usr/bin/killall.psmisc 90
+Name: less
+postinstall scriptlet (using /bin/sh):
+# less - postinst
+#!/bin/sh
+	update-alternatives --install /usr/bin/less less /usr/bin/less.less 100
+Name: tar
+postinstall scriptlet (using /bin/sh):
+# tar - postinst
+#!/bin/sh
+	update-alternatives --install /bin/tar tar /bin/tar.tar 100
+Name: inetutils-syslogd
+postinstall scriptlet (using /bin/sh):
+# inetutils-syslogd - postinst
+#!/bin/sh
+	update-alternatives --install /sbin/syslogd syslogd /sbin/syslogd.inetutils 80
+Name: util-linux-readprofile
+postinstall scriptlet (using /bin/sh):
+# util-linux-readprofile - postinst
+#!/bin/sh
+	update-alternatives --install /usr/sbin/readprofile readprofile /usr/sbin/readprofile.util-linux 100
+Name: inetutils-inetd
+postinstall scriptlet (using /bin/sh):
+# inetutils-inetd - postinst
+#!/bin/sh
+	update-alternatives --install /usr/bin/inetd inetd /usr/bin/inetd.inetutils 80
+Name: inetutils-rsh
+postinstall scriptlet (using /bin/sh):
+# inetutils-rsh - postinst
+#!/bin/sh
+	update-alternatives --install /usr/bin/rcp rcp /usr/bin/rcp.inetutils 80
+	update-alternatives --install /usr/bin/rexec rexec /usr/bin/rexec.inetutils 80
+	update-alternatives --install /usr/bin/rlogin rlogin /usr/bin/rlogin.inetutils 80
+	update-alternatives --install /usr/bin/rsh rsh /usr/bin/rsh.inetutils 80
+Name: inetutils-logger
+postinstall scriptlet (using /bin/sh):
+# inetutils-logger - postinst
+#!/bin/sh
+	update-alternatives --install /usr/bin/logger logger /usr/bin/logger.inetutils 80
+Name: busybox-syslog
+postinstall scriptlet (using /bin/sh):
+# busybox-syslog - postinst
+#!/bin/sh
+	update-alternatives --install /etc/syslog.conf syslog-conf /etc/syslog.conf.busybox 50
+	update-alternatives --install /etc/init.d/syslog syslog-init /etc/init.d/syslog.busybox 50
+	update-alternatives --install /etc/syslog-startup.conf syslog-startup-conf /etc/syslog-startup.conf.busybox 50
+if type update-rc.d >/dev/null 2>/dev/null; then
+	if [ -n "$D" ]; then
+		OPT="-r $D"
+	else
+		OPT="-s"
+	fi
+	update-rc.d $OPT syslog defaults
+fi
+Name: gzip
+postinstall scriptlet (using /bin/sh):
+# gzip - postinst
+#!/bin/sh
+	update-alternatives --install /bin/gunzip gunzip /bin/gunzip.gzip 100
+	update-alternatives --install /bin/gzip gzip /bin/gzip.gzip 100
+	update-alternatives --install /bin/zcat zcat /bin/zcat.gzip 100
+Name: gawk
+postinstall scriptlet (using /bin/sh):
+# gawk - postinst
+#!/bin/sh
+	update-alternatives --install /usr/bin/awk awk /usr/bin/gawk 100
+Name: util-linux-sulogin
+postinstall scriptlet (using /bin/sh):
+# util-linux-sulogin - postinst
+#!/bin/sh
+	update-alternatives --install /sbin/sulogin sulogin /sbin/sulogin.util-linux 100
+Name: inetutils-telnet
+postinstall scriptlet (using /bin/sh):
+# inetutils-telnet - postinst
+#!/bin/sh
+	update-alternatives --install /usr/bin/telnet telnet /usr/bin/telnet.inetutils 80
+Name: iproute2
+postinstall scriptlet (using /bin/sh):
+# iproute2 - postinst
+#!/bin/sh
+	update-alternatives --install /sbin/ip ip /sbin/ip.iproute2 100
+Name: diffutils
+postinstall scriptlet (using /bin/sh):
+# diffutils - postinst
+#!/bin/sh
+	update-alternatives --install /usr/bin/diff diff /usr/bin/diff.diffutils 100
+	update-alternatives --install /usr/bin/cmp cmp /usr/bin/cmp.diffutils 100
+Name: iputils-ping
+postinstall scriptlet (using /bin/sh):
+# iputils-ping - postinst
+#!/bin/sh
+	update-alternatives --install /bin/ping ping /bin/ping.iputils 100
+Name: openssh-scp
+postinstall scriptlet (using /bin/sh):
+# openssh-scp - postinst
+#!/bin/sh
+	update-alternatives --install /usr/bin/scp scp /usr/bin/scp.openssh 90
+Name: grep
+postinstall scriptlet (using /bin/sh):
+# grep - postinst
+#!/bin/sh
+	update-alternatives --install /bin/grep grep /bin/grep.grep 100
+	update-alternatives --install /bin/egrep egrep /bin/egrep.grep 100
+	update-alternatives --install /bin/fgrep fgrep /bin/fgrep.grep 100
+Name: findutils
+postinstall scriptlet (using /bin/sh):
+# findutils - postinst
+#!/bin/sh
+	update-alternatives --install /usr/bin/find find /usr/bin/find.findutils 100
+	update-alternatives --install /usr/bin/xargs xargs /usr/bin/xargs.findutils 100
+Name: sysvinit-pidof
+postinstall scriptlet (using /bin/sh):
+# sysvinit-pidof - postinst
+#!/bin/sh
+	update-alternatives --install /bin/pidof pidof /bin/pidof.sysvinit 200
+Name: which
+postinstall scriptlet (using /bin/sh):
+# which - postinst
+#!/bin/sh
+	update-alternatives --install /usr/bin/which which /usr/bin/which.which 100
+Name: inetutils-traceroute
+postinstall scriptlet (using /bin/sh):
+# inetutils-traceroute - postinst
+#!/bin/sh
+	update-alternatives --install /usr/bin/traceroute traceroute /usr/bin/traceroute.inetutils 80
+Name: shadow-base
+postinstall scriptlet (using /bin/sh):
+# shadow-base - postinst
+#!/bin/sh
+	update-alternatives --install /usr/bin/newgrp newgrp /usr/bin/newgrp.shadow 200
+	update-alternatives --install /usr/bin/groups groups /usr/bin/groups.shadow 200
+	update-alternatives --install /bin/login login /bin/login.shadow 200
+	update-alternatives --install /bin/su su /bin/su.shadow 200
+Name: util-linux-getopt
+postinstall scriptlet (using /bin/sh):
+# util-linux-getopt - postinst
+#!/bin/sh
+	update-alternatives --install /bin/getopt getopt /bin/getopt.util-linux 100
+Name: traceroute
+postinstall scriptlet (using /bin/sh):
+# traceroute - postinst
+#!/bin/sh
+	update-alternatives --install /usr/bin/traceroute traceroute /usr/bin/traceroute.traceroute 60
+Name: mingetty
+postinstall scriptlet (using /bin/sh):
+# mingetty - postinst
+#!/bin/sh
+	update-alternatives --install /sbin/getty getty /sbin/mingetty 10
+Name: kbd
+postinstall scriptlet (using /bin/sh):
+# kbd - postinst
+#!/bin/sh
+	update-alternatives --install /usr/bin/chvt chvt /usr/bin/chvt.kbd 100
+	update-alternatives --install /usr/bin/deallocvt deallocvt /usr/bin/deallocvt.kbd 100
+	update-alternatives --install /usr/bin/fgconsole fgconsole /usr/bin/fgconsole.kbd 100
+	update-alternatives --install /usr/bin/openvt openvt /usr/bin/openvt.kbd 100
+Name: mktemp
+postinstall scriptlet (using /bin/sh):
+# mktemp - postinst
+#!/bin/sh
+	update-alternatives --install /bin/mktemp mktemp /bin/mktemp.mktemp 100
+Name: unzip
+postinstall scriptlet (using /bin/sh):
+# unzip - postinst
+#!/bin/sh
+	update-alternatives --install /usr/bin/unzip unzip /usr/bin/unzip.unzip 100
+Name: initscripts-functions
+postinstall scriptlet (using /bin/sh):
+# initscripts-functions - postinst
+#!/bin/sh
+	update-alternatives --install /etc/init.d/functions functions /etc/init.d/functions.initscripts 90
+Name: fuser
+postinstall scriptlet (using /bin/sh):
+# fuser - postinst
+#!/bin/sh
+	update-alternatives --install /usr/bin/fuser fuser /usr/bin/fuser.psmisc 90
+Name: bridge-utils
+postinstall scriptlet (using /bin/sh):
+# bridge-utils - postinst
+#!/bin/sh
+	update-alternatives --install /usr/sbin/brctl brctl /usr/sbin/brctl.bridge-utils 100
+Name: perl
+Name: pam-plugin-warn
+Name: pam-plugin-unix
+Name: pam-plugin-deny
+Name: pam-passwdqc
+Name: pam-plugin-permit
+Name: fsl-pme
+Name: sysfsutils
+Name: apptrk
+Name: prelink
+postinstall scriptlet (using /bin/sh):
+# prelink - postinst
+#!/bin/sh
+
+if [ "x$D" != "x" ]; then
+  exit 0
+fi
+
+prelink -a
+Name: iproute2-tc
+Name: libfontconfig1
+postinstall scriptlet (using /bin/sh):
+# libfontconfig1 - postinst
+#!/bin/sh
+if [ x"$D" = "x" ]; then
+	if [ -x /sbin/ldconfig ]; then /sbin/ldconfig ; fi
+fi
+Name: libstdc++6
+postinstall scriptlet (using /bin/sh):
+# libstdc++6 - postinst
+#!/bin/sh
+if [ x"$D" = "x" ]; then
+	if [ -x /sbin/ldconfig ]; then /sbin/ldconfig ; fi
+fi
+Name: ntp-tickadj
+Name: portmap
+postinstall scriptlet (using /bin/sh):
+# portmap - postinst
+#!/bin/sh
+if type update-rc.d >/dev/null 2>/dev/null; then
+	if [ -n "$D" ]; then
+		OPT="-r $D"
+	else
+		OPT="-s"
+	fi
+	update-rc.d $OPT portmap start 10 2 3 4 5 . stop 32 0 1 6 .
+fi
+Name: tcp-wrappers
+Name: libglib-2.0-0
+postinstall scriptlet (using /bin/sh):
+# libglib-2.0-0 - postinst
+#!/bin/sh
+if [ x"$D" = "x" ]; then
+	if [ -x /sbin/ldconfig ]; then /sbin/ldconfig ; fi
+fi
+Name: mtd-utils-jffs2
+Name: libpng16-16
+postinstall scriptlet (using /bin/sh):
+# libpng16-16 - postinst
+#!/bin/sh
+if [ x"$D" = "x" ]; then
+	if [ -x /sbin/ldconfig ]; then /sbin/ldconfig ; fi
+fi
+Name: libpci3
+postinstall scriptlet (using /bin/sh):
+# libpci3 - postinst
+#!/bin/sh
+if [ x"$D" = "x" ]; then
+	if [ -x /sbin/ldconfig ]; then /sbin/ldconfig ; fi
+fi
+Name: binutils
+postinstall scriptlet (using /bin/sh):
+# binutils - postinst
+#!/bin/sh
+	update-alternatives --install /usr/bin/addr2line addr2line /usr/bin/powerpc-fsl-linux-gnuspe-addr2line 100
+	update-alternatives --install /usr/bin/ar ar /usr/bin/powerpc-fsl-linux-gnuspe-ar 100
+	update-alternatives --install /usr/bin/as as /usr/bin/powerpc-fsl-linux-gnuspe-as 100
+	update-alternatives --install /usr/bin/c++filt c++filt /usr/bin/powerpc-fsl-linux-gnuspe-c++filt 100
+	update-alternatives --install /usr/bin/elfedit elfedit /usr/bin/powerpc-fsl-linux-gnuspe-elfedit 100
+	update-alternatives --install /usr/bin/gprof gprof /usr/bin/powerpc-fsl-linux-gnuspe-gprof 100
+	update-alternatives --install /usr/bin/ld ld /usr/bin/powerpc-fsl-linux-gnuspe-ld 100
+	update-alternatives --install /usr/bin/ld.bfd ld.bfd /usr/bin/powerpc-fsl-linux-gnuspe-ld.bfd 100
+	update-alternatives --install /usr/bin/nm nm /usr/bin/powerpc-fsl-linux-gnuspe-nm 100
+	update-alternatives --install /usr/bin/objcopy objcopy /usr/bin/powerpc-fsl-linux-gnuspe-objcopy 100
+	update-alternatives --install /usr/bin/objdump objdump /usr/bin/powerpc-fsl-linux-gnuspe-objdump 100
+	update-alternatives --install /usr/bin/ranlib ranlib /usr/bin/powerpc-fsl-linux-gnuspe-ranlib 100
+	update-alternatives --install /usr/bin/readelf readelf /usr/bin/powerpc-fsl-linux-gnuspe-readelf 100
+	update-alternatives --install /usr/bin/size size /usr/bin/powerpc-fsl-linux-gnuspe-size 100
+	update-alternatives --install /usr/bin/strings strings /usr/bin/powerpc-fsl-linux-gnuspe-strings 100
+	update-alternatives --install /usr/bin/strip strip /usr/bin/powerpc-fsl-linux-gnuspe-strip 100
+if [ x"$D" = "x" ]; then
+	if [ -x /sbin/ldconfig ]; then /sbin/ldconfig ; fi
+fi
+Name: cracklib
+postinstall scriptlet (using /bin/sh):
+# cracklib - postinst
+#!/bin/sh
+if [ x"$D" = "x" ]; then
+	if [ -x /sbin/ldconfig ]; then /sbin/ldconfig ; fi
+fi
+Name: libxml2
+postinstall scriptlet (using /bin/sh):
+# libxml2 - postinst
+#!/bin/sh
+if [ x"$D" = "x" ]; then
+	if [ -x /sbin/ldconfig ]; then /sbin/ldconfig ; fi
+fi
+Name: file
+postinstall scriptlet (using /bin/sh):
+# file - postinst
+#!/bin/sh
+if [ x"$D" = "x" ]; then
+	if [ -x /sbin/ldconfig ]; then /sbin/ldconfig ; fi
+fi
+Name: kmod
+postinstall scriptlet (using /bin/sh):
+# kmod - postinst
+#!/bin/sh
+	update-alternatives --install /sbin/insmod insmod /sbin/insmod.kmod 60
+	update-alternatives --install /sbin/modprobe modprobe /sbin/modprobe.kmod 60
+	update-alternatives --install /sbin/rmmod rmmod /sbin/rmmod.kmod 60
+	update-alternatives --install /sbin/modinfo modinfo /sbin/modinfo.kmod 60
+	update-alternatives --install /bin/lsmod bin-lsmod /bin/lsmod.kmod 60
+	update-alternatives --install /sbin/lsmod lsmod /bin/lsmod.kmod 60
+	update-alternatives --install /sbin/depmod depmod /sbin/depmod.kmod 60
+Name: libtcl8.6-0
+postinstall scriptlet (using /bin/sh):
+# libtcl8.6-0 - postinst
+#!/bin/sh
+if [ x"$D" = "x" ]; then
+	if [ -x /sbin/ldconfig ]; then /sbin/ldconfig ; fi
+fi
+Name: libkmod2
+postinstall scriptlet (using /bin/sh):
+# libkmod2 - postinst
+#!/bin/sh
+if [ x"$D" = "x" ]; then
+	if [ -x /sbin/ldconfig ]; then /sbin/ldconfig ; fi
+fi
+Name: libgcrypt
+postinstall scriptlet (using /bin/sh):
+# libgcrypt - postinst
+#!/bin/sh
+if [ x"$D" = "x" ]; then
+	if [ -x /sbin/ldconfig ]; then /sbin/ldconfig ; fi
+fi
+Name: libpcreposix0
+postinstall scriptlet (using /bin/sh):
+# libpcreposix0 - postinst
+#!/bin/sh
+if [ x"$D" = "x" ]; then
+	if [ -x /sbin/ldconfig ]; then /sbin/ldconfig ; fi
+fi
+Name: lvm2
+postinstall scriptlet (using /bin/sh):
+# lvm2 - postinst
+#!/bin/sh
+if [ x"$D" = "x" ]; then
+	if [ -x /sbin/ldconfig ]; then /sbin/ldconfig ; fi
+fi
+Name: kdump
+Name: libtiff5
+postinstall scriptlet (using /bin/sh):
+# libtiff5 - postinst
+#!/bin/sh
+if [ x"$D" = "x" ]; then
+	if [ -x /sbin/ldconfig ]; then /sbin/ldconfig ; fi
+fi
+Name: kexec
+Name: bzip2
+postinstall scriptlet (using /bin/sh):
+# bzip2 - postinst
+#!/bin/sh
+	update-alternatives --install /usr/bin/bunzip2 bunzip2 /usr/bin/bunzip2.bzip2 100
+	update-alternatives --install /usr/bin/bzcat bzcat /usr/bin/bzcat.bzip2 100
+Name: libdw1
+postinstall scriptlet (using /bin/sh):
+# libdw1 - postinst
+#!/bin/sh
+if [ x"$D" = "x" ]; then
+	if [ -x /sbin/ldconfig ]; then /sbin/ldconfig ; fi
+fi
+Name: lmsensors-sensors
+Name: kernel-module-msdos
+postinstall scriptlet (using /bin/sh):
+# kernel-module-msdos - postinst
+#!/bin/sh
+if [ -z "$D" ]; then
+	depmod -a 3.12.37-rt51+g43cecda
+else
+	# image.bbclass will call depmodwrapper after everything is installed,
+	# no need to do it here as well
+	:
+fi
+Name: kernel-module-pcbc
+postinstall scriptlet (using /bin/sh):
+# kernel-module-pcbc - postinst
+#!/bin/sh
+if [ -z "$D" ]; then
+	depmod -a 3.12.37-rt51+g43cecda
+else
+	# image.bbclass will call depmodwrapper after everything is installed,
+	# no need to do it here as well
+	:
+fi
+Name: kernel-module-cryptodev
+postinstall scriptlet (using /bin/sh):
+# kernel-module-cryptodev - postinst
+#!/bin/sh
+if [ -z "$D" ]; then
+	depmod -a 3.12.37-rt51+g43cecda
+else
+	# image.bbclass will call depmodwrapper after everything is installed,
+	# no need to do it here as well
+	:
+fi
+Name: kernel-module-qnx4
+postinstall scriptlet (using /bin/sh):
+# kernel-module-qnx4 - postinst
+#!/bin/sh
+if [ -z "$D" ]; then
+	depmod -a 3.12.37-rt51+g43cecda
+else
+	# image.bbclass will call depmodwrapper after everything is installed,
+	# no need to do it here as well
+	:
+fi
+Name: kernel-module-nls-utf8
+postinstall scriptlet (using /bin/sh):
+# kernel-module-nls-utf8 - postinst
+#!/bin/sh
+if [ -z "$D" ]; then
+	depmod -a 3.12.37-rt51+g43cecda
+else
+	# image.bbclass will call depmodwrapper after everything is installed,
+	# no need to do it here as well
+	:
+fi
+Name: kernel-module-efs
+postinstall scriptlet (using /bin/sh):
+# kernel-module-efs - postinst
+#!/bin/sh
+if [ -z "$D" ]; then
+	depmod -a 3.12.37-rt51+g43cecda
+else
+	# image.bbclass will call depmodwrapper after everything is installed,
+	# no need to do it here as well
+	:
+fi
+Name: kernel-module-isofs
+postinstall scriptlet (using /bin/sh):
+# kernel-module-isofs - postinst
+#!/bin/sh
+if [ -z "$D" ]; then
+	depmod -a 3.12.37-rt51+g43cecda
+else
+	# image.bbclass will call depmodwrapper after everything is installed,
+	# no need to do it here as well
+	:
+fi
+Name: kernel-module-hpfs
+postinstall scriptlet (using /bin/sh):
+# kernel-module-hpfs - postinst
+#!/bin/sh
+if [ -z "$D" ]; then
+	depmod -a 3.12.37-rt51+g43cecda
+else
+	# image.bbclass will call depmodwrapper after everything is installed,
+	# no need to do it here as well
+	:
+fi
+Name: kernel-module-ff-memless
+postinstall scriptlet (using /bin/sh):
+# kernel-module-ff-memless - postinst
+#!/bin/sh
+if [ -z "$D" ]; then
+	depmod -a 3.12.37-rt51+g43cecda
+else
+	# image.bbclass will call depmodwrapper after everything is installed,
+	# no need to do it here as well
+	:
+fi
+Name: kernel-module-hfsplus
+postinstall scriptlet (using /bin/sh):
+# kernel-module-hfsplus - postinst
+#!/bin/sh
+if [ -z "$D" ]; then
+	depmod -a 3.12.37-rt51+g43cecda
+else
+	# image.bbclass will call depmodwrapper after everything is installed,
+	# no need to do it here as well
+	:
+fi
+Name: kernel-module-ucc-uart
+postinstall scriptlet (using /bin/sh):
+# kernel-module-ucc-uart - postinst
+#!/bin/sh
+if [ -z "$D" ]; then
+	depmod -a 3.12.37-rt51+g43cecda
+else
+	# image.bbclass will call depmodwrapper after everything is installed,
+	# no need to do it here as well
+	:
+fi
+Name: kernel-module-affs
+postinstall scriptlet (using /bin/sh):
+# kernel-module-affs - postinst
+#!/bin/sh
+if [ -z "$D" ]; then
+	depmod -a 3.12.37-rt51+g43cecda
+else
+	# image.bbclass will call depmodwrapper after everything is installed,
+	# no need to do it here as well
+	:
+fi
+Name: kernel-module-crc-itu-t
+postinstall scriptlet (using /bin/sh):
+# kernel-module-crc-itu-t - postinst
+#!/bin/sh
+if [ -z "$D" ]; then
+	depmod -a 3.12.37-rt51+g43cecda
+else
+	# image.bbclass will call depmodwrapper after everything is installed,
+	# no need to do it here as well
+	:
+fi
+Name: kernel-module-i2c-cpm
+postinstall scriptlet (using /bin/sh):
+# kernel-module-i2c-cpm - postinst
+#!/bin/sh
+if [ -z "$D" ]; then
+	depmod -a 3.12.37-rt51+g43cecda
+else
+	# image.bbclass will call depmodwrapper after everything is installed,
+	# no need to do it here as well
+	:
+fi
+Name: kernel-module-bfs
+postinstall scriptlet (using /bin/sh):
+# kernel-module-bfs - postinst
+#!/bin/sh
+if [ -z "$D" ]; then
+	depmod -a 3.12.37-rt51+g43cecda
+else
+	# image.bbclass will call depmodwrapper after everything is installed,
+	# no need to do it here as well
+	:
+fi
+Name: kernel-module-ufs
+postinstall scriptlet (using /bin/sh):
+# kernel-module-ufs - postinst
+#!/bin/sh
+if [ -z "$D" ]; then
+	depmod -a 3.12.37-rt51+g43cecda
+else
+	# image.bbclass will call depmodwrapper after everything is installed,
+	# no need to do it here as well
+	:
+fi
+Name: kernel-module-befs
+postinstall scriptlet (using /bin/sh):
+# kernel-module-befs - postinst
+#!/bin/sh
+if [ -z "$D" ]; then
+	depmod -a 3.12.37-rt51+g43cecda
+else
+	# image.bbclass will call depmodwrapper after everything is installed,
+	# no need to do it here as well
+	:
+fi
+Name: kernel-module-crc32c
+postinstall scriptlet (using /bin/sh):
+# kernel-module-crc32c - postinst
+#!/bin/sh
+if [ -z "$D" ]; then
+	depmod -a 3.12.37-rt51+g43cecda
+else
+	# image.bbclass will call depmodwrapper after everything is installed,
+	# no need to do it here as well
+	:
+fi
+Name: kernel-module-hfs
+postinstall scriptlet (using /bin/sh):
+# kernel-module-hfs - postinst
+#!/bin/sh
+if [ -z "$D" ]; then
+	depmod -a 3.12.37-rt51+g43cecda
+else
+	# image.bbclass will call depmodwrapper after everything is installed,
+	# no need to do it here as well
+	:
+fi
+Name: kernel-module-adfs
+postinstall scriptlet (using /bin/sh):
+# kernel-module-adfs - postinst
+#!/bin/sh
+if [ -z "$D" ]; then
+	depmod -a 3.12.37-rt51+g43cecda
+else
+	# image.bbclass will call depmodwrapper after everything is installed,
+	# no need to do it here as well
+	:
+fi
+Name: kernel-module-freevxfs
+postinstall scriptlet (using /bin/sh):
+# kernel-module-freevxfs - postinst
+#!/bin/sh
+if [ -z "$D" ]; then
+	depmod -a 3.12.37-rt51+g43cecda
+else
+	# image.bbclass will call depmodwrapper after everything is installed,
+	# no need to do it here as well
+	:
+fi
+Name: kernel-module-binfmt-misc
+postinstall scriptlet (using /bin/sh):
+# kernel-module-binfmt-misc - postinst
+#!/bin/sh
+if [ -z "$D" ]; then
+	depmod -a 3.12.37-rt51+g43cecda
+else
+	# image.bbclass will call depmodwrapper after everything is installed,
+	# no need to do it here as well
+	:
+fi
+Name: kernel-module-sysv
+postinstall scriptlet (using /bin/sh):
+# kernel-module-sysv - postinst
+#!/bin/sh
+if [ -z "$D" ]; then
+	depmod -a 3.12.37-rt51+g43cecda
+else
+	# image.bbclass will call depmodwrapper after everything is installed,
+	# no need to do it here as well
+	:
+fi
+Name: kernel-module-libcrc32c
+postinstall scriptlet (using /bin/sh):
+# kernel-module-libcrc32c - postinst
+#!/bin/sh
+if [ -z "$D" ]; then
+	depmod -a 3.12.37-rt51+g43cecda
+else
+	# image.bbclass will call depmodwrapper after everything is installed,
+	# no need to do it here as well
+	:
+fi
+Name: libxcb1
+postinstall scriptlet (using /bin/sh):
+# libxcb1 - postinst
+#!/bin/sh
+if [ x"$D" = "x" ]; then
+	if [ -x /sbin/ldconfig ]; then /sbin/ldconfig ; fi
+fi
+Name: libgettextsrc
+postinstall scriptlet (using /bin/sh):
+# libgettextsrc - postinst
+#!/bin/sh
+if [ x"$D" = "x" ]; then
+	if [ -x /sbin/ldconfig ]; then /sbin/ldconfig ; fi
+fi
+Name: libts-1.0-0
+postinstall scriptlet (using /bin/sh):
+# libts-1.0-0 - postinst
+#!/bin/sh
+if [ x"$D" = "x" ]; then
+	if [ -x /sbin/ldconfig ]; then /sbin/ldconfig ; fi
+fi
+Name: util-linux-losetup
+postinstall scriptlet (using /bin/sh):
+# util-linux-losetup - postinst
+#!/bin/sh
+	update-alternatives --install /sbin/losetup losetup /sbin/losetup.util-linux 100
+Name: logrotate
+Name: libss2
+postinstall scriptlet (using /bin/sh):
+# libss2 - postinst
+#!/bin/sh
+if [ x"$D" = "x" ]; then
+	if [ -x /sbin/ldconfig ]; then /sbin/ldconfig ; fi
+fi
+Name: unionfs-fuse
+Name: openl2tp
+Name: inetutils-ftp
+postinstall scriptlet (using /bin/sh):
+# inetutils-ftp - postinst
+#!/bin/sh
+	update-alternatives --install /usr/bin/ftp ftp /usr/bin/ftp.inetutils 80
+Name: sqlite3
+Name: tftp-hpa
+postinstall scriptlet (using /bin/sh):
+# tftp-hpa - postinst
+#!/bin/sh
+	update-alternatives --install /usr/bin/tftp tftp /usr/bin/tftp-hpa 50
+Name: mtd-utils-ubifs
+Name: libblkid1
+postinstall scriptlet (using /bin/sh):
+# libblkid1 - postinst
+#!/bin/sh
+if [ x"$D" = "x" ]; then
+	if [ -x /sbin/ldconfig ]; then /sbin/ldconfig ; fi
+fi
+Name: netcat-openbsd
+postinstall scriptlet (using /bin/sh):
+# netcat-openbsd - postinst
+#!/bin/sh
+	update-alternatives --install /usr/bin/nc nc /usr/bin/nc.netcat-openbsd 50
+Name: libacl1
+postinstall scriptlet (using /bin/sh):
+# libacl1 - postinst
+#!/bin/sh
+if [ x"$D" = "x" ]; then
+	if [ -x /sbin/ldconfig ]; then /sbin/ldconfig ; fi
+fi
+Name: attr
+Name: dhcp-client
+postinstall scriptlet (using /bin/sh):
+# dhcp-client - postinst
+mkdir -p $D//var/lib/dhcp
+Name: dhcp-server
+postinstall scriptlet (using /bin/sh):
+# dhcp-server - postinst
+mkdir -p $D//var/lib/dhcp
+    touch $D//var/lib/dhcp/dhcpd.leases
+    touch $D//var/lib/dhcp/dhcpd6.leases
+Name: libssl1.0.0
+postinstall scriptlet (using /bin/sh):
+# libssl1.0.0 - postinst
+#!/bin/sh
+if [ x"$D" = "x" ]; then
+	if [ -x /sbin/ldconfig ]; then /sbin/ldconfig ; fi
+fi
+Name: openssh-keygen
+Name: tcpdump
+Name: ipsec-tools
+postinstall scriptlet (using /bin/sh):
+# ipsec-tools - postinst
+#!/bin/sh
+if [ x"$D" = "x" ]; then
+	if [ -x /sbin/ldconfig ]; then /sbin/ldconfig ; fi
+fi
+Name: openssh-ssh
+postinstall scriptlet (using /bin/sh):
+# openssh-ssh - postinst
+#!/bin/sh
+	update-alternatives --install /usr/bin/ssh ssh /usr/bin/ssh.openssh 90
+Name: lttng-ust
+postinstall scriptlet (using /bin/sh):
+# lttng-ust - postinst
+#!/bin/sh
+if [ x"$D" = "x" ]; then
+	if [ -x /sbin/ldconfig ]; then /sbin/ldconfig ; fi
+fi
+Name: libavahi-core7
+postinstall scriptlet (using /bin/sh):
+# libavahi-core7 - postinst
+#!/bin/sh
+if [ x"$D" = "x" ]; then
+	if [ -x /sbin/ldconfig ]; then /sbin/ldconfig ; fi
+fi
+Name: libavahi-client3
+postinstall scriptlet (using /bin/sh):
+# libavahi-client3 - postinst
+#!/bin/sh
+if [ x"$D" = "x" ]; then
+	if [ -x /sbin/ldconfig ]; then /sbin/ldconfig ; fi
+fi
+Name: nettle
+postinstall scriptlet (using /bin/sh):
+# nettle - postinst
+#!/bin/sh
+if [ x"$D" = "x" ]; then
+	if [ -x /sbin/ldconfig ]; then /sbin/ldconfig ; fi
+fi
+Name: coreutils
+postinstall scriptlet (using /bin/sh):
+# coreutils - postinst
+#!/bin/sh
+	update-alternatives --install /usr/bin/[ lbracket /usr/bin/lbracket.coreutils 100
+	update-alternatives --install /usr/bin/arch arch /usr/bin/arch.coreutils 100
+	update-alternatives --install /usr/bin/basename basename /usr/bin/basename.coreutils 100
+	update-alternatives --install /usr/bin/chcon chcon /usr/bin/chcon.coreutils 100
+	update-alternatives --install /usr/bin/cksum cksum /usr/bin/cksum.coreutils 100
+	update-alternatives --install /usr/bin/comm comm /usr/bin/comm.coreutils 100
+	update-alternatives --install /usr/bin/csplit csplit /usr/bin/csplit.coreutils 100
+	update-alternatives --install /usr/bin/cut cut /usr/bin/cut.coreutils 100
+	update-alternatives --install /usr/bin/dir dir /usr/bin/dir.coreutils 100
+	update-alternatives --install /usr/bin/dircolors dircolors /usr/bin/dircolors.coreutils 100
+	update-alternatives --install /usr/bin/dirname dirname /usr/bin/dirname.coreutils 100
+	update-alternatives --install /usr/bin/du du /usr/bin/du.coreutils 100
+	update-alternatives --install /usr/bin/env env /usr/bin/env.coreutils 100
+	update-alternatives --install /usr/bin/expand expand /usr/bin/expand.coreutils 100
+	update-alternatives --install /usr/bin/expr expr /usr/bin/expr.coreutils 100
+	update-alternatives --install /usr/bin/factor factor /usr/bin/factor.coreutils 100
+	update-alternatives --install /usr/bin/fmt fmt /usr/bin/fmt.coreutils 100
+	update-alternatives --install /usr/bin/fold fold /usr/bin/fold.coreutils 100
+	update-alternatives --install /usr/bin/groups groups /usr/bin/groups.coreutils 100
+	update-alternatives --install /usr/bin/head head /usr/bin/head.coreutils 100
+	update-alternatives --install /usr/bin/hostid hostid /usr/bin/hostid.coreutils 100
+	update-alternatives --install /usr/bin/id id /usr/bin/id.coreutils 100
+	update-alternatives --install /usr/bin/install install /usr/bin/install.coreutils 100
+	update-alternatives --install /usr/bin/join join /usr/bin/join.coreutils 100
+	update-alternatives --install /usr/bin/link link /usr/bin/link.coreutils 100
+	update-alternatives --install /usr/bin/logname logname /usr/bin/logname.coreutils 100
+	update-alternatives --install /usr/bin/md5sum md5sum /usr/bin/md5sum.coreutils 100
+	update-alternatives --install /usr/bin/mkfifo mkfifo /usr/bin/mkfifo.coreutils 100
+	update-alternatives --install /usr/bin/nice nice /usr/bin/nice.coreutils 100
+	update-alternatives --install /usr/bin/nl nl /usr/bin/nl.coreutils 100
+	update-alternatives --install /usr/bin/nohup nohup /usr/bin/nohup.coreutils 100
+	update-alternatives --install /usr/bin/nproc nproc /usr/bin/nproc.coreutils 100
+	update-alternatives --install /usr/bin/od od /usr/bin/od.coreutils 100
+	update-alternatives --install /usr/bin/paste paste /usr/bin/paste.coreutils 100
+	update-alternatives --install /usr/bin/pathchk pathchk /usr/bin/pathchk.coreutils 100
+	update-alternatives --install /usr/bin/pinky pinky /usr/bin/pinky.coreutils 100
+	update-alternatives --install /usr/bin/pr pr /usr/bin/pr.coreutils 100
+	update-alternatives --install /usr/bin/printenv printenv /usr/bin/printenv.coreutils 100
+	update-alternatives --install /usr/bin/printf printf /usr/bin/printf.coreutils 100
+	update-alternatives --install /usr/bin/ptx ptx /usr/bin/ptx.coreutils 100
+	update-alternatives --install /usr/bin/readlink readlink /usr/bin/readlink.coreutils 100
+	update-alternatives --install /usr/bin/realpath realpath /usr/bin/realpath.coreutils 100
+	update-alternatives --install /usr/bin/runcon runcon /usr/bin/runcon.coreutils 100
+	update-alternatives --install /usr/bin/seq seq /usr/bin/seq.coreutils 100
+	update-alternatives --install /usr/bin/sha1sum sha1sum /usr/bin/sha1sum.coreutils 100
+	update-alternatives --install /usr/bin/sha224sum sha224sum /usr/bin/sha224sum.coreutils 100
+	update-alternatives --install /usr/bin/sha256sum sha256sum /usr/bin/sha256sum.coreutils 100
+	update-alternatives --install /usr/bin/sha384sum sha384sum /usr/bin/sha384sum.coreutils 100
+	update-alternatives --install /usr/bin/sha512sum sha512sum /usr/bin/sha512sum.coreutils 100
+	update-alternatives --install /usr/bin/shred shred /usr/bin/shred.coreutils 100
+	update-alternatives --install /usr/bin/shuf shuf /usr/bin/shuf.coreutils 100
+	update-alternatives --install /usr/bin/sort sort /usr/bin/sort.coreutils 100
+	update-alternatives --install /usr/bin/split split /usr/bin/split.coreutils 100
+	update-alternatives --install /usr/bin/stdbuf stdbuf /usr/bin/stdbuf.coreutils 100
+	update-alternatives --install /usr/bin/sum sum /usr/bin/sum.coreutils 100
+	update-alternatives --install /usr/bin/tac tac /usr/bin/tac.coreutils 100
+	update-alternatives --install /usr/bin/tail tail /usr/bin/tail.coreutils 100
+	update-alternatives --install /usr/bin/tee tee /usr/bin/tee.coreutils 100
+	update-alternatives --install /usr/bin/test test /usr/bin/test.coreutils 100
+	update-alternatives --install /usr/bin/timeout timeout /usr/bin/timeout.coreutils 100
+	update-alternatives --install /usr/bin/tr tr /usr/bin/tr.coreutils 100
+	update-alternatives --install /usr/bin/truncate truncate /usr/bin/truncate.coreutils 100
+	update-alternatives --install /usr/bin/tsort tsort /usr/bin/tsort.coreutils 100
+	update-alternatives --install /usr/bin/tty tty /usr/bin/tty.coreutils 100
+	update-alternatives --install /usr/bin/unexpand unexpand /usr/bin/unexpand.coreutils 100
+	update-alternatives --install /usr/bin/uniq uniq /usr/bin/uniq.coreutils 100
+	update-alternatives --install /usr/bin/unlink unlink /usr/bin/unlink.coreutils 100
+	update-alternatives --install /usr/bin/uptime uptime /usr/bin/uptime.coreutils 100
+	update-alternatives --install /usr/bin/users users /usr/bin/users.coreutils 100
+	update-alternatives --install /usr/bin/vdir vdir /usr/bin/vdir.coreutils 100
+	update-alternatives --install /usr/bin/wc wc /usr/bin/wc.coreutils 100
+	update-alternatives --install /usr/bin/who who /usr/bin/who.coreutils 100
+	update-alternatives --install /usr/bin/whoami whoami /usr/bin/whoami.coreutils 100
+	update-alternatives --install /usr/bin/yes yes /usr/bin/yes.coreutils 100
+	update-alternatives --install /bin/cat cat /bin/cat.coreutils 100
+	update-alternatives --install /bin/chgrp chgrp /bin/chgrp.coreutils 100
+	update-alternatives --install /bin/chmod chmod /bin/chmod.coreutils 100
+	update-alternatives --install /bin/chown chown /bin/chown.coreutils 100
+	update-alternatives --install /bin/cp cp /bin/cp.coreutils 100
+	update-alternatives --install /bin/date date /bin/date.coreutils 100
+	update-alternatives --install /bin/dd dd /bin/dd.coreutils 100
+	update-alternatives --install /bin/echo echo /bin/echo.coreutils 100
+	update-alternatives --install /bin/false false /bin/false.coreutils 100
+	update-alternatives --install /bin/kill kill /bin/kill.coreutils 100
+	update-alternatives --install /bin/ln ln /bin/ln.coreutils 100
+	update-alternatives --install /bin/ls ls /bin/ls.coreutils 100
+	update-alternatives --install /bin/mkdir mkdir /bin/mkdir.coreutils 100
+	update-alternatives --install /bin/mknod mknod /bin/mknod.coreutils 100
+	update-alternatives --install /bin/mv mv /bin/mv.coreutils 100
+	update-alternatives --install /bin/pwd pwd /bin/pwd.coreutils 100
+	update-alternatives --install /bin/rm rm /bin/rm.coreutils 100
+	update-alternatives --install /bin/rmdir rmdir /bin/rmdir.coreutils 100
+	update-alternatives --install /bin/sleep sleep /bin/sleep.coreutils 100
+	update-alternatives --install /bin/stty stty /bin/stty.coreutils 100
+	update-alternatives --install /bin/sync sync /bin/sync.coreutils 100
+	update-alternatives --install /bin/touch touch /bin/touch.coreutils 100
+	update-alternatives --install /bin/true true /bin/true.coreutils 100
+	update-alternatives --install /bin/uname uname /bin/uname.coreutils 100
+	update-alternatives --install /bin/stat stat /bin/stat.coreutils 100
+	update-alternatives --install /usr/sbin/chroot chroot /usr/sbin/chroot.coreutils 100
+	update-alternatives --install /bin/base64 base64 /usr/bin/base64.coreutils 100
+	update-alternatives --install /bin/mktemp mktemp /usr/bin/mktemp.coreutils 100
+	update-alternatives --install /bin/df df /usr/bin/df.coreutils 100
+Name: procps
+postinstall scriptlet (using /bin/sh):
+# procps - postinst
+#!/bin/sh
+	update-alternatives --install /usr/bin/free free /usr/bin/free.procps 100
+	update-alternatives --install /usr/bin/pkill pkill /usr/bin/pkill.procps 100
+	update-alternatives --install /usr/bin/pmap pmap /usr/bin/pmap.procps 100
+	update-alternatives --install /usr/bin/pgrep pgrep /usr/bin/pgrep.procps 100
+	update-alternatives --install /usr/bin/pwdx pwdx /usr/bin/pwdx.procps 100
+	update-alternatives --install /usr/bin/skill skill /usr/bin/skill.procps 100
+	update-alternatives --install /usr/bin/snice snice /usr/bin/snice.procps 100
+	update-alternatives --install /usr/bin/top top /usr/bin/top.procps 100
+	update-alternatives --install /usr/bin/uptime uptime /usr/bin/uptime.procps 100
+	update-alternatives --install /bin/kill kill /bin/kill.procps 100
+	update-alternatives --install /bin/pidof pidof /bin/pidof.procps 100
+	update-alternatives --install /bin/ps ps /bin/ps.procps 100
+	update-alternatives --install /bin/watch watch /bin/watch.procps 100
+	update-alternatives --install /sbin/sysctl sysctl /sbin/sysctl.procps 100
+if [ x"$D" = "x" ]; then
+	if [ -x /sbin/ldconfig ]; then /sbin/ldconfig ; fi
+fi
+Name: rp-pppoe
+Name: libnl-nf-3-200
+postinstall scriptlet (using /bin/sh):
+# libnl-nf-3-200 - postinst
+#!/bin/sh
+if [ x"$D" = "x" ]; then
+	if [ -x /sbin/ldconfig ]; then /sbin/ldconfig ; fi
+fi
+Name: shadow
+postinstall scriptlet (using /bin/sh):
+# shadow - postinst
+	if [ "x$D" != "x" ]; then
+	  rootarg="--root $D"
+	else
+	  rootarg=""
+	fi
+
+	pwconv $rootarg || exit 1
+	grpconv $rootarg || exit 1
+	update-alternatives --install /usr/bin/passwd passwd /usr/bin/passwd.shadow 200
+	update-alternatives --install /usr/bin/chfn chfn /usr/bin/chfn.shadow 200
+	update-alternatives --install /usr/bin/chsh chsh /usr/bin/chsh.shadow 200
+	update-alternatives --install /usr/sbin/chpasswd chpasswd /usr/sbin/chpasswd.shadow 200
+	update-alternatives --install /sbin/vipw vipw /sbin/vipw.shadow 200
+	update-alternatives --install /sbin/vigr vigr /sbin/vigr.shadow 200
+Name: lsb
+Name: sysvinit
+postinstall scriptlet (using /bin/sh):
+# sysvinit - postinst
+#!/bin/sh
+	update-alternatives --install /sbin/init init /sbin/init.sysvinit 50
+	update-alternatives --install /bin/mountpoint mountpoint /bin/mountpoint.sysvinit 200
+	update-alternatives --install /sbin/halt halt /sbin/halt.sysvinit 200
+	update-alternatives --install /sbin/reboot reboot /sbin/reboot.sysvinit 200
+	update-alternatives --install /sbin/runlevel runlevel /sbin/runlevel.sysvinit 200
+	update-alternatives --install /sbin/shutdown shutdown /sbin/shutdown.sysvinit 200
+	update-alternatives --install /sbin/poweroff poweroff /sbin/poweroff.sysvinit 200
+	update-alternatives --install /usr/bin/last last /usr/bin/last.sysvinit 200
+	update-alternatives --install /usr/bin/mesg mesg /usr/bin/mesg.sysvinit 200
+	update-alternatives --install /usr/bin/utmpdump utmpdump /usr/bin/utmpdump.sysvinit 200
+	update-alternatives --install /usr/bin/wall wall /usr/bin/wall.sysvinit 200
+Name: initscripts
+postinstall scriptlet (using /bin/sh):
+# initscripts - postinst
+	if false; then
+		if [ -n "$D" ]; then
+			OPTS="--root=$D"
+		fi
+		for SERVICE in    banner   bootmisc   checkfs   checkroot   devpts   dmesg   hostname   mountall   mountnfs   populate-volatile   read-only-rootfs-hook   rmnologin   sysfs   urandom; do
+			systemctl $OPTS mask $SERVICE.service
+		done
+	fi
+
+    # Delete any old volatile cache script, as directories may have moved
+    if [ -z "$D" ]; then
+        rm -f "/etc/volatile.cache"
+    fi
+Name: watchdog
+postinstall scriptlet (using /bin/sh):
+# watchdog - postinst
+#!/bin/sh
+if type update-rc.d >/dev/null 2>/dev/null; then
+	if [ -n "$D" ]; then
+		OPT="-r $D"
+	else
+		OPT="-s"
+	fi
+	update-rc.d $OPT watchdog.sh start 15 1 2 3 4 5 . stop 85 0 6 .
+fi
+Name: xinetd
+postinstall scriptlet (using /bin/sh):
+# xinetd - postinst
+#!/bin/sh
+if type update-rc.d >/dev/null 2>/dev/null; then
+	if [ -n "$D" ]; then
+		OPT="-r $D"
+	else
+		OPT="-s"
+	fi
+	update-rc.d $OPT xinetd defaults
+fi
+Name: krb5
+postinstall scriptlet (using /bin/sh):
+# krb5 - postinst
+#!/bin/sh
+if [ x"$D" = "x" ]; then
+	if [ -x /sbin/ldconfig ]; then /sbin/ldconfig ; fi
+fi
+Name: at
+postinstall scriptlet (using /bin/sh):
+# at - postinst
+#!/bin/sh
+if type update-rc.d >/dev/null 2>/dev/null; then
+	if [ -n "$D" ]; then
+		OPT="-r $D"
+	else
+		OPT="-s"
+	fi
+	update-rc.d $OPT atd defaults
+fi
+Name: psmisc
+Name: numactl
+postinstall scriptlet (using /bin/sh):
+# numactl - postinst
+#!/bin/sh
+if [ x"$D" = "x" ]; then
+	if [ -x /sbin/ldconfig ]; then /sbin/ldconfig ; fi
+fi
+Name: lmbench
+postinstall scriptlet (using /bin/sh):
+# lmbench - postinst
+if [ -z "$D" ]; then
+        if command -v systemd-tmpfiles >/dev/null; then
+            systemd-tmpfiles --create /etc/tmpfiles.d/lmbench.conf
+        elif [ -e /etc/init.d/populate-volatile.sh ]; then
+            /etc/init.d/populate-volatile.sh update
+        fi
+    fi
+Name: perl-module-if
+Name: perl-module-exporter
+Name: perl-module-perlio
+Name: i2c-tools-misc
+Name: lib-perl
+Name: libpam-runtime
+Name: fontconfig-utils
+Name: libsigc-2.0-0
+postinstall scriptlet (using /bin/sh):
+# libsigc-2.0-0 - postinst
+#!/bin/sh
+if [ x"$D" = "x" ]; then
+	if [ -x /sbin/ldconfig ]; then /sbin/ldconfig ; fi
+fi
+Name: libbeecrypt7
+postinstall scriptlet (using /bin/sh):
+# libbeecrypt7 - postinst
+#!/bin/sh
+if [ x"$D" = "x" ]; then
+	if [ -x /sbin/ldconfig ]; then /sbin/ldconfig ; fi
+fi
+Name: iperf
+Name: babeltrace
+postinstall scriptlet (using /bin/sh):
+# babeltrace - postinst
+#!/bin/sh
+if [ x"$D" = "x" ]; then
+	if [ -x /sbin/ldconfig ]; then /sbin/ldconfig ; fi
+fi
+Name: libharfbuzz0
+postinstall scriptlet (using /bin/sh):
+# libharfbuzz0 - postinst
+#!/bin/sh
+if [ x"$D" = "x" ]; then
+	if [ -x /sbin/ldconfig ]; then /sbin/ldconfig ; fi
+fi
+Name: pkgconfig
+Name: libproxy
+postinstall scriptlet (using /bin/sh):
+# libproxy - postinst
+#!/bin/sh
+if [ x"$D" = "x" ]; then
+	if [ -x /sbin/ldconfig ]; then /sbin/ldconfig ; fi
+fi
+Name: libavahi-glib1
+postinstall scriptlet (using /bin/sh):
+# libavahi-glib1 - postinst
+#!/bin/sh
+if [ x"$D" = "x" ]; then
+	if [ -x /sbin/ldconfig ]; then /sbin/ldconfig ; fi
+fi
+Name: libatk-1.0-0
+postinstall scriptlet (using /bin/sh):
+# libatk-1.0-0 - postinst
+#!/bin/sh
+if [ x"$D" = "x" ]; then
+	if [ -x /sbin/ldconfig ]; then /sbin/ldconfig ; fi
+fi
+Name: gdk-pixbuf
+postinstall scriptlet (using /bin/sh):
+# gdk-pixbuf - postinst
+#!/bin/sh
+if [ x"$D" = "x" ]; then
+	if [ -x /sbin/ldconfig ]; then /sbin/ldconfig ; fi
+fi
+Name: libnetsnmp30
+postinstall scriptlet (using /bin/sh):
+# libnetsnmp30 - postinst
+#!/bin/sh
+if [ x"$D" = "x" ]; then
+	if [ -x /sbin/ldconfig ]; then /sbin/ldconfig ; fi
+fi
+Name: oprofile
+Name: shared-mime-info
+Name: libxslt
+postinstall scriptlet (using /bin/sh):
+# libxslt - postinst
+#!/bin/sh
+if [ x"$D" = "x" ]; then
+	if [ -x /sbin/ldconfig ]; then /sbin/ldconfig ; fi
+fi
+Name: tcl
+Name: pciutils
+Name: elfutils
+Name: cryptodev-module
+Name: kernel-module-udf
+postinstall scriptlet (using /bin/sh):
+# kernel-module-udf - postinst
+#!/bin/sh
+if [ -z "$D" ]; then
+	depmod -a 3.12.37-rt51+g43cecda
+else
+	# image.bbclass will call depmodwrapper after everything is installed,
+	# no need to do it here as well
+	:
+fi
+Name: kernel-module-sctp
+postinstall scriptlet (using /bin/sh):
+# kernel-module-sctp - postinst
+#!/bin/sh
+if [ -z "$D" ]; then
+	depmod -a 3.12.37-rt51+g43cecda
+else
+	# image.bbclass will call depmodwrapper after everything is installed,
+	# no need to do it here as well
+	:
+fi
+Name: libx11-6
+postinstall scriptlet (using /bin/sh):
+# libx11-6 - postinst
+#!/bin/sh
+if [ x"$D" = "x" ]; then
+	if [ -x /sbin/ldconfig ]; then /sbin/ldconfig ; fi
+fi
+Name: libxcb-shm0
+postinstall scriptlet (using /bin/sh):
+# libxcb-shm0 - postinst
+#!/bin/sh
+if [ x"$D" = "x" ]; then
+	if [ -x /sbin/ldconfig ]; then /sbin/ldconfig ; fi
+fi
+Name: libxcb-render0
+postinstall scriptlet (using /bin/sh):
+# libxcb-render0 - postinst
+#!/bin/sh
+if [ x"$D" = "x" ]; then
+	if [ -x /sbin/ldconfig ]; then /sbin/ldconfig ; fi
+fi
+Name: gettext
+postinstall scriptlet (using /bin/sh):
+# gettext - postinst
+#!/bin/sh
+if [ x"$D" = "x" ]; then
+	if [ -x /sbin/ldconfig ]; then /sbin/ldconfig ; fi
+fi
+Name: libext2fs2
+postinstall scriptlet (using /bin/sh):
+# libext2fs2 - postinst
+#!/bin/sh
+if [ x"$D" = "x" ]; then
+	if [ -x /sbin/ldconfig ]; then /sbin/ldconfig ; fi
+fi
+Name: util-linux-fdisk
+postinstall scriptlet (using /bin/sh):
+# util-linux-fdisk - postinst
+#!/bin/sh
+	update-alternatives --install /sbin/fdisk fdisk /sbin/fdisk.util-linux 100
+Name: xfsprogs-mkfs
+Name: udev
+postinstall scriptlet (using /bin/sh):
+# udev - postinst
+#!/bin/sh
+if type update-rc.d >/dev/null 2>/dev/null; then
+	if [ -n "$D" ]; then
+		OPT="-r $D"
+	else
+		OPT="-s"
+	fi
+	update-rc.d $OPT udev start 04 S .
+fi
+Name: parted
+postinstall scriptlet (using /bin/sh):
+# parted - postinst
+#!/bin/sh
+if [ x"$D" = "x" ]; then
+	if [ -x /sbin/ldconfig ]; then /sbin/ldconfig ; fi
+fi
+Name: util-linux-cfdisk
+Name: libmount1
+postinstall scriptlet (using /bin/sh):
+# libmount1 - postinst
+#!/bin/sh
+if [ x"$D" = "x" ]; then
+	if [ -x /sbin/ldconfig ]; then /sbin/ldconfig ; fi
+fi
+Name: acl
+Name: rsync
+Name: mailx
+Name: tnftp
+postinstall scriptlet (using /bin/sh):
+# tnftp - postinst
+#!/bin/sh
+	update-alternatives --install /usr/bin/ftp ftp /usr/bin/tnftp 100
+Name: tcf-agent
+postinstall scriptlet (using /bin/sh):
+# tcf-agent - postinst
+#!/bin/sh
+if type update-rc.d >/dev/null 2>/dev/null; then
+	if [ -n "$D" ]; then
+		OPT="-r $D"
+	else
+		OPT="-s"
+	fi
+	update-rc.d $OPT tcf-agent start 99 3 5 . stop 20 0 1 2 6 .
+fi
+Name: syslog-ng-libs
+postinstall scriptlet (using /bin/sh):
+# syslog-ng-libs - postinst
+#!/bin/sh
+if [ x"$D" = "x" ]; then
+	if [ -x /sbin/ldconfig ]; then /sbin/ldconfig ; fi
+fi
+Name: ipsec-demo
+Name: asf
+Name: libgnutls28
+postinstall scriptlet (using /bin/sh):
+# libgnutls28 - postinst
+#!/bin/sh
+if [ x"$D" = "x" ]; then
+	if [ -x /sbin/ldconfig ]; then /sbin/ldconfig ; fi
+fi
+Name: usbutils
+Name: libevent
+postinstall scriptlet (using /bin/sh):
+# libevent - postinst
+#!/bin/sh
+if [ x"$D" = "x" ]; then
+	if [ -x /sbin/ldconfig ]; then /sbin/ldconfig ; fi
+fi
+Name: glibc-mtrace
+Name: slang
+postinstall scriptlet (using /bin/sh):
+# slang - postinst
+#!/bin/sh
+if [ x"$D" = "x" ]; then
+	if [ -x /sbin/ldconfig ]; then /sbin/ldconfig ; fi
+fi
+Name: valgrind
+Name: blktrace
+Name: python-lang
+Name: logcheck
+Name: libnl-3-cli
+postinstall scriptlet (using /bin/sh):
+# libnl-3-cli - postinst
+#!/bin/sh
+if [ x"$D" = "x" ]; then
+	if [ -x /sbin/ldconfig ]; then /sbin/ldconfig ; fi
+fi
+Name: lttng-tools
+postinstall scriptlet (using /bin/sh):
+# lttng-tools - postinst
+#!/bin/sh
+if [ x"$D" = "x" ]; then
+	if [ -x /sbin/ldconfig ]; then /sbin/ldconfig ; fi
+fi
+Name: radvd
+postinstall scriptlet (using /bin/sh):
+# radvd - postinst
+if [ -z "$D" -a -x /etc/init.d/populate-volatile.sh ]; then
+	/etc/init.d/populate-volatile.sh update
+    fi
+if type update-rc.d >/dev/null 2>/dev/null; then
+	if [ -n "$D" ]; then
+		OPT="-r $D"
+	else
+		OPT="-s"
+	fi
+	update-rc.d $OPT radvd defaults 20 80
+fi
+Name: avahi-daemon
+postinstall scriptlet (using /bin/sh):
+# avahi-daemon - postinst
+if [ -z "$D" ]; then
+	killall -q -HUP dbus-daemon || true
+fi
+if type update-rc.d >/dev/null 2>/dev/null; then
+	if [ -n "$D" ]; then
+		OPT="-r $D"
+	else
+		OPT="-s"
+	fi
+	update-rc.d $OPT avahi-daemon defaults 21 19
+fi
+Name: ppp-dialin
+Name: ntp
+postinstall scriptlet (using /bin/sh):
+# ntp - postinst
+#!/bin/sh
+if type update-rc.d >/dev/null 2>/dev/null; then
+	if [ -n "$D" ]; then
+		OPT="-r $D"
+	else
+		OPT="-s"
+	fi
+	update-rc.d $OPT ntpd defaults
+fi
+Name: vsftpd
+postinstall scriptlet (using /bin/sh):
+# vsftpd - postinst
+if [ -z "$D" ]; then
+	if type systemd-tmpfiles >/dev/null; then
+	    systemd-tmpfiles --create
+	elif [ -e /etc/init.d/populate-volatile.sh ]; then
+	    /etc/init.d/populate-volatile.sh update
+	fi
+    fi
+if type update-rc.d >/dev/null 2>/dev/null; then
+	if [ -n "$D" ]; then
+		OPT="-r $D"
+	else
+		OPT="-s"
+	fi
+	update-rc.d $OPT vsftpd defaults 80
+fi
+Name: cronie
+postinstall scriptlet (using /bin/sh):
+# cronie - postinst
+#!/bin/sh
+if type update-rc.d >/dev/null 2>/dev/null; then
+	if [ -n "$D" ]; then
+		OPT="-r $D"
+	else
+		OPT="-s"
+	fi
+	update-rc.d $OPT crond start 90 2 3 4 5 . stop 60 0 1 6 .
+fi
+Name: openssh-sshd
+postinstall scriptlet (using /bin/sh):
+# openssh-sshd - postinst
+#!/bin/sh
+if type update-rc.d >/dev/null 2>/dev/null; then
+	if [ -n "$D" ]; then
+		OPT="-r $D"
+	else
+		OPT="-s"
+	fi
+	update-rc.d $OPT sshd defaults 9
+fi
+Name: rpcbind
+postinstall scriptlet (using /bin/sh):
+# rpcbind - postinst
+#!/bin/sh
+if type update-rc.d >/dev/null 2>/dev/null; then
+	if [ -n "$D" ]; then
+		OPT="-r $D"
+	else
+		OPT="-s"
+	fi
+	update-rc.d $OPT rpcbind start 12 2 3 4 5 . stop 60 0 1 6 .
+fi
+Name: sysklogd
+postinstall scriptlet (using /bin/sh):
+# sysklogd - postinst
+#!/bin/sh
+	update-alternatives --install /sbin/syslogd syslogd /sbin/syslogd.sysklogd 100
+	update-alternatives --install /sbin/klogd klogd /sbin/klogd.sysklogd 100
+	update-alternatives --install /etc/init.d/syslog syslog-init /etc/init.d/syslog.sysklogd 100
+	update-alternatives --install /etc/syslog.conf syslog-conf /etc/syslog.conf.sysklogd 100
+if type update-rc.d >/dev/null 2>/dev/null; then
+	if [ -n "$D" ]; then
+		OPT="-r $D"
+	else
+		OPT="-s"
+	fi
+	update-rc.d $OPT syslog defaults
+fi
+Name: inetutils-telnetd
+postinstall scriptlet (using /bin/sh):
+# inetutils-telnetd - postinst
+#!/bin/sh
+	update-alternatives --install /usr/bin/telnetd telnetd /usr/sbin/in.telnetd 80
+Name: inetutils-tftpd
+postinstall scriptlet (using /bin/sh):
+# inetutils-tftpd - postinst
+#!/bin/sh
+	update-alternatives --install /usr/bin/tftpd tftpd /usr/sbin/in.tftpd 80
+Name: inetutils
+postinstall scriptlet (using /bin/sh):
+# inetutils - postinst
+#!/bin/sh
+	update-alternatives --install /usr/bin/talk talk /usr/bin/talk.inetutils 80
+	update-alternatives --install /usr/bin/whois whois /usr/bin/whois.inetutils 80
+Name: inetutils-ftpd
+postinstall scriptlet (using /bin/sh):
+# inetutils-ftpd - postinst
+#!/bin/sh
+	update-alternatives --install /usr/bin/ftpd ftpd /usr/bin/ftpd.inetutils 80
+Name: inetutils-rshd
+postinstall scriptlet (using /bin/sh):
+# inetutils-rshd - postinst
+#!/bin/sh
+	update-alternatives --install /usr/bin/rshd rshd /usr/sbin/in.rshd 80
+	update-alternatives --install /usr/bin/rexecd rexecd /usr/sbin/in.rexecd 80
+	update-alternatives --install /usr/bin/rlogind rlogind /usr/sbin/in.rlogind 80
+Name: perl-module-carp
+Name: i2c-tools
+Name: liberation-fonts
+postinstall scriptlet (using /bin/sh):
+# liberation-fonts - postinst
+#!/bin/sh
+if [ "x$D" != "x" ] ; then
+	$INTERCEPT_DIR/postinst_intercept update_font_cache liberation-fonts mlprefix= bindir=/usr/bin \
+		libdir=/usr/lib base_libdir=/lib fontconfigcachedir=/var/cache/fontconfig
+else
+	fc-cache
+fi
+Name: glibmm
+postinstall scriptlet (using /bin/sh):
+# glibmm - postinst
+#!/bin/sh
+if [ x"$D" = "x" ]; then
+	if [ -x /sbin/ldconfig ]; then /sbin/ldconfig ; fi
+fi
+Name: rpm-libs
+postinstall scriptlet (using /bin/sh):
+# rpm-libs - postinst
+#!/bin/sh
+if [ x"$D" = "x" ]; then
+	if [ -x /sbin/ldconfig ]; then /sbin/ldconfig ; fi
+fi
+Name: packagegroup-fsl-benchmark-core
+Name: gdk-pixbuf-loader-jpeg
+postinstall scriptlet (using /bin/sh):
+# gdk-pixbuf-loader-jpeg - postinst
+#!/bin/sh
+if [ "x$D" != "x" ]; then
+	$INTERCEPT_DIR/postinst_intercept update_pixbuf_cache gdk-pixbuf-loader-jpeg mlprefix= libdir=/usr/lib \
+		bindir=/usr/bin base_libdir=/lib
+else
+
+	# Update the pixbuf loaders in case they haven't been registered yet
+	GDK_PIXBUF_MODULEDIR=/usr/lib/gdk-pixbuf-2.0/2.10.0/loaders gdk-pixbuf-query-loaders --update-cache
+
+	if [ -x /usr/bin/gtk-update-icon-cache ] && [ -d /usr/share/icons ]; then
+		for icondir in /usr/share/icons/*; do
+			if [ -d ${icondir} ]; then
+				gtk-update-icon-cache -t -q ${icondir}
+			fi
+		done
+	fi
+fi
+Name: gdk-pixbuf-loader-png
+postinstall scriptlet (using /bin/sh):
+# gdk-pixbuf-loader-png - postinst
+#!/bin/sh
+if [ "x$D" != "x" ]; then
+	$INTERCEPT_DIR/postinst_intercept update_pixbuf_cache gdk-pixbuf-loader-png mlprefix= libdir=/usr/lib \
+		bindir=/usr/bin base_libdir=/lib
+else
+
+	# Update the pixbuf loaders in case they haven't been registered yet
+	GDK_PIXBUF_MODULEDIR=/usr/lib/gdk-pixbuf-2.0/2.10.0/loaders gdk-pixbuf-query-loaders --update-cache
+
+	if [ -x /usr/bin/gtk-update-icon-cache ] && [ -d /usr/share/icons ]; then
+		for icondir in /usr/share/icons/*; do
+			if [ -d ${icondir} ]; then
+				gtk-update-icon-cache -t -q ${icondir}
+			fi
+		done
+	fi
+fi
+Name: gdk-pixbuf-loader-xpm
+postinstall scriptlet (using /bin/sh):
+# gdk-pixbuf-loader-xpm - postinst
+#!/bin/sh
+if [ "x$D" != "x" ]; then
+	$INTERCEPT_DIR/postinst_intercept update_pixbuf_cache gdk-pixbuf-loader-xpm mlprefix= libdir=/usr/lib \
+		bindir=/usr/bin base_libdir=/lib
+else
+
+	# Update the pixbuf loaders in case they haven't been registered yet
+	GDK_PIXBUF_MODULEDIR=/usr/lib/gdk-pixbuf-2.0/2.10.0/loaders gdk-pixbuf-query-loaders --update-cache
+
+	if [ -x /usr/bin/gtk-update-icon-cache ] && [ -d /usr/share/icons ]; then
+		for icondir in /usr/share/icons/*; do
+			if [ -d ${icondir} ]; then
+				gtk-update-icon-cache -t -q ${icondir}
+			fi
+		done
+	fi
+fi
+Name: gdk-pixbuf-loader-gif
+postinstall scriptlet (using /bin/sh):
+# gdk-pixbuf-loader-gif - postinst
+#!/bin/sh
+if [ "x$D" != "x" ]; then
+	$INTERCEPT_DIR/postinst_intercept update_pixbuf_cache gdk-pixbuf-loader-gif mlprefix= libdir=/usr/lib \
+		bindir=/usr/bin base_libdir=/lib
+else
+
+	# Update the pixbuf loaders in case they haven't been registered yet
+	GDK_PIXBUF_MODULEDIR=/usr/lib/gdk-pixbuf-2.0/2.10.0/loaders gdk-pixbuf-query-loaders --update-cache
+
+	if [ -x /usr/bin/gtk-update-icon-cache ] && [ -d /usr/share/icons ]; then
+		for icondir in /usr/share/icons/*; do
+			if [ -d ${icondir} ]; then
+				gtk-update-icon-cache -t -q ${icondir}
+			fi
+		done
+	fi
+fi
+Name: net-snmp-server-snmpd
+Name: net-snmp-client
+Name: openipmi
+postinstall scriptlet (using /bin/sh):
+# openipmi - postinst
+#!/bin/sh
+if [ x"$D" = "x" ]; then
+	if [ -x /sbin/ldconfig ]; then /sbin/ldconfig ; fi
+fi
+Name: expect
+Name: openssl
+Name: kernel-modules
+Name: libxext6
+postinstall scriptlet (using /bin/sh):
+# libxext6 - postinst
+#!/bin/sh
+if [ x"$D" = "x" ]; then
+	if [ -x /sbin/ldconfig ]; then /sbin/ldconfig ; fi
+fi
+Name: libxrender1
+postinstall scriptlet (using /bin/sh):
+# libxrender1 - postinst
+#!/bin/sh
+if [ x"$D" = "x" ]; then
+	if [ -x /sbin/ldconfig ]; then /sbin/ldconfig ; fi
+fi
+Name: dbus-1
+postinstall scriptlet (using /bin/sh):
+# dbus-1 - postinst
+	# If both systemd and sysvinit are enabled, mask the dbus-1 init script
+        if false; then
+		if [ -n "$D" ]; then
+			OPTS="--root=$D"
+		fi
+		systemctl $OPTS mask dbus-1.service
+	fi
+
+	if [ -z "$D" ] && [ -e /etc/init.d/populate-volatile.sh ] ; then
+		/etc/init.d/populate-volatile.sh update
+	fi
+if type update-rc.d >/dev/null 2>/dev/null; then
+	if [ -n "$D" ]; then
+		OPT="-r $D"
+	else
+		OPT="-s"
+	fi
+	update-rc.d $OPT dbus-1 start 02 5 3 2 . stop 20 0 1 6 .
+fi
+Name: libxcomposite1
+postinstall scriptlet (using /bin/sh):
+# libxcomposite1 - postinst
+#!/bin/sh
+if [ x"$D" = "x" ]; then
+	if [ -x /sbin/ldconfig ]; then /sbin/ldconfig ; fi
+fi
+Name: libxfixes3
+postinstall scriptlet (using /bin/sh):
+# libxfixes3 - postinst
+#!/bin/sh
+if [ x"$D" = "x" ]; then
+	if [ -x /sbin/ldconfig ]; then /sbin/ldconfig ; fi
+fi
+Name: e2fsprogs-mke2fs
+Name: e2fsprogs-tune2fs
+Name: quota
+Name: e2fsprogs-badblocks
+Name: e2fsprogs-e2fsck
+Name: xfsprogs
+Name: udev-extraconf
+Name: packagegroup-core-boot
+Name: util-linux-umount
+postinstall scriptlet (using /bin/sh):
+# util-linux-umount - postinst
+#!/bin/sh
+	update-alternatives --install /bin/umount umount /bin/umount.util-linux 100
+Name: util-linux-mount
+postinstall scriptlet (using /bin/sh):
+# util-linux-mount - postinst
+#!/bin/sh
+	update-alternatives --install /bin/mount mount /bin/mount.util-linux 100
+Name: util-linux-swaponoff
+postinstall scriptlet (using /bin/sh):
+# util-linux-swaponoff - postinst
+#!/bin/sh
+	update-alternatives --install /sbin/swapoff swapoff /sbin/swapoff.util-linux 100
+	update-alternatives --install /sbin/swapon swapon /sbin/swapon.util-linux 100
+Name: smartmontools
+postinstall scriptlet (using /bin/sh):
+# smartmontools - postinst
+#!/bin/sh
+if type update-rc.d >/dev/null 2>/dev/null; then
+	if [ -n "$D" ]; then
+		OPT="-r $D"
+	else
+		OPT="-s"
+	fi
+	update-rc.d $OPT smartd start 60 2 3 4 5 . stop 60 0 1 6 .
+fi
+Name: syslog-ng
+postinstall scriptlet (using /bin/sh):
+# syslog-ng - postinst
+#!/bin/sh
+	update-alternatives --install /etc/init.d/syslog syslog-init /etc/init.d/syslog.syslog-ng 200
+if type update-rc.d >/dev/null 2>/dev/null; then
+	if [ -n "$D" ]; then
+		OPT="-r $D"
+	else
+		OPT="-s"
+	fi
+	update-rc.d $OPT syslog start 20 2 3 4 5 . stop 90 0 1 6 .
+fi
+Name: libneon27
+postinstall scriptlet (using /bin/sh):
+# libneon27 - postinst
+#!/bin/sh
+if [ x"$D" = "x" ]; then
+	if [ -x /sbin/ldconfig ]; then /sbin/ldconfig ; fi
+fi
+Name: wget
+postinstall scriptlet (using /bin/sh):
+# wget - postinst
+#!/bin/sh
+	update-alternatives --install /usr/bin/wget wget /usr/bin/wget.wget 100
+Name: libgnutls-openssl27
+postinstall scriptlet (using /bin/sh):
+# libgnutls-openssl27 - postinst
+#!/bin/sh
+if [ x"$D" = "x" ]; then
+	if [ -x /sbin/ldconfig ]; then /sbin/ldconfig ; fi
+fi
+Name: libcurl4
+postinstall scriptlet (using /bin/sh):
+# libcurl4 - postinst
+#!/bin/sh
+if [ x"$D" = "x" ]; then
+	if [ -x /sbin/ldconfig ]; then /sbin/ldconfig ; fi
+fi
+Name: perf
+Name: libnewt0.52
+postinstall scriptlet (using /bin/sh):
+# libnewt0.52 - postinst
+#!/bin/sh
+if [ x"$D" = "x" ]; then
+	if [ -x /sbin/ldconfig ]; then /sbin/ldconfig ; fi
+fi
+Name: python-core
+Name: libnl-3-genl
+postinstall scriptlet (using /bin/sh):
+# libnl-3-genl - postinst
+#!/bin/sh
+if [ x"$D" = "x" ]; then
+	if [ -x /sbin/ldconfig ]; then /sbin/ldconfig ; fi
+fi
+Name: libnss-mdns
+postinstall scriptlet (using /bin/sh):
+# libnss-mdns - postinst
+	sed -e '/^hosts:/s/\s*\<mdns\>//' \
+		-e 's/\(^hosts:.*\)\(\<files\>\)\(.*\)\(\<dns\>\)\(.*\)/\1\2 mdns4_minimal [NOTFOUND=return]\3\4 mdns\5/' \
+		-i $D/etc/nsswitch.conf
+if [ x"$D" = "x" ]; then
+	if [ -x /sbin/ldconfig ]; then /sbin/ldconfig ; fi
+fi
+Name: oprofileui-server
+postinstall scriptlet (using /bin/sh):
+# oprofileui-server - postinst
+#!/bin/sh
+if type update-rc.d >/dev/null 2>/dev/null; then
+	if [ -n "$D" ]; then
+		OPT="-r $D"
+	else
+		OPT="-s"
+	fi
+	update-rc.d $OPT oprofileui-server start 99 5 2 . stop 20 0 1 6 .
+fi
+Name: openssh
+Name: nfs-utils-client
+postinstall scriptlet (using /bin/sh):
+# nfs-utils-client - postinst
+#!/bin/sh
+if type update-rc.d >/dev/null 2>/dev/null; then
+	if [ -n "$D" ]; then
+		OPT="-r $D"
+	else
+		OPT="-s"
+	fi
+	update-rc.d $OPT nfscommon defaults 19 21
+fi
+Name: packagegroup-fsl-networking-core-server
+Name: perl-module-deprecate
+Name: perl-module-exporter-heavy
+Name: perl-module-constant
+Name: perl-module-term-cap
+Name: perl-module-base
+Name: perl-module-dynaloader
+Name: rpm
+Name: net-snmp-server-snmptrapd
+Name: net-snmp
+Name: libxrandr2
+postinstall scriptlet (using /bin/sh):
+# libxrandr2 - postinst
+#!/bin/sh
+if [ x"$D" = "x" ]; then
+	if [ -x /sbin/ldconfig ]; then /sbin/ldconfig ; fi
+fi
+Name: libxft2
+postinstall scriptlet (using /bin/sh):
+# libxft2 - postinst
+#!/bin/sh
+if [ x"$D" = "x" ]; then
+	if [ -x /sbin/ldconfig ]; then /sbin/ldconfig ; fi
+fi
+Name: libcairo2
+postinstall scriptlet (using /bin/sh):
+# libcairo2 - postinst
+#!/bin/sh
+if [ x"$D" = "x" ]; then
+	if [ -x /sbin/ldconfig ]; then /sbin/ldconfig ; fi
+fi
+Name: libxcursor1
+postinstall scriptlet (using /bin/sh):
+# libxcursor1 - postinst
+#!/bin/sh
+if [ x"$D" = "x" ]; then
+	if [ -x /sbin/ldconfig ]; then /sbin/ldconfig ; fi
+fi
+Name: libxdamage1
+postinstall scriptlet (using /bin/sh):
+# libxdamage1 - postinst
+#!/bin/sh
+if [ x"$D" = "x" ]; then
+	if [ -x /sbin/ldconfig ]; then /sbin/ldconfig ; fi
+fi
+Name: e2fsprogs
+postinstall scriptlet (using /bin/sh):
+# e2fsprogs - postinst
+#!/bin/sh
+	update-alternatives --install /bin/chattr chattr /bin/chattr.e2fsprogs 100
+Name: util-linux
+postinstall scriptlet (using /bin/sh):
+# util-linux - postinst
+#!/bin/sh
+	update-alternatives --install /bin/dmesg dmesg /bin/dmesg.util-linux 100
+	update-alternatives --install /bin/kill kill /bin/kill.util-linux 100
+	update-alternatives --install /bin/more more /bin/more.util-linux 100
+	update-alternatives --install /sbin/mkswap mkswap /sbin/mkswap.util-linux 100
+	update-alternatives --install /sbin/blockdev blockdev /sbin/blockdev.util-linux 100
+	update-alternatives --install /sbin/pivot_root pivot_root /sbin/pivot_root.util-linux 100
+	update-alternatives --install /sbin/switch_root switch_root /sbin/switch_root.util-linux 100
+	update-alternatives --install /sbin/mkfs.minix mkfs.minix /sbin/mkfs.minix.util-linux 100
+	update-alternatives --install /usr/bin/hexdump hexdump /usr/bin/hexdump.util-linux 100
+	update-alternatives --install /usr/bin/last last /usr/bin/last.util-linux 100
+	update-alternatives --install /usr/bin/lastb lastb /usr/bin/lastb.util-linux 100
+	update-alternatives --install /usr/bin/logger logger /usr/bin/logger.util-linux 100
+	update-alternatives --install /usr/bin/mesg mesg /usr/bin/mesg.util-linux 100
+	update-alternatives --install /usr/bin/renice renice /usr/bin/renice.util-linux 100
+	update-alternatives --install /usr/bin/wall wall /usr/bin/wall.util-linux 100
+	update-alternatives --install /usr/bin/setsid setsid /usr/bin/setsid.util-linux 100
+	update-alternatives --install /usr/bin/chrt chrt /usr/bin/chrt.util-linux 100
+	update-alternatives --install /usr/bin/flock flock /usr/bin/flock.util-linux 100
+	update-alternatives --install /usr/bin/utmpdump utmpdump /usr/bin/utmpdump.util-linux 100
+	update-alternatives --install /usr/bin/eject eject /usr/bin/eject.util-linux 100
+Name: iputils-ping6
+postinstall scriptlet (using /bin/sh):
+# iputils-ping6 - postinst
+#!/bin/sh
+	update-alternatives --install /bin/ping6 ping6 /bin/ping6.iputils 100
+Name: strongswan
+Name: chkconfig
+Name: python-resource
+Name: python-threading
+Name: python-codecs
+Name: python-readline
+Name: python-unixadmin
+Name: python-fcntl
+Name: python-elementtree
+Name: python-shell
+Name: systemtap
+Name: pax-utils
+Name: python-stringold
+Name: python-crypt
+Name: python-zlib
+Name: bind
+postinstall scriptlet (using /bin/sh):
+# bind - postinst
+#!/bin/sh
+if type update-rc.d >/dev/null 2>/dev/null; then
+	if [ -n "$D" ]; then
+		OPT="-r $D"
+	else
+		OPT="-s"
+	fi
+	update-rc.d $OPT bind defaults
+fi
+Name: powertop
+postinstall scriptlet (using /bin/sh):
+# powertop - postinst
+#!/bin/sh
+	update-alternatives --install /usr/sbin/powertop powertop /usr/sbin/powertop.powertop 100
+Name: packagegroup-core-ssh-openssh
+Name: nfs-utils
+postinstall scriptlet (using /bin/sh):
+# nfs-utils - postinst
+#!/bin/sh
+if type update-rc.d >/dev/null 2>/dev/null; then
+	if [ -n "$D" ]; then
+		OPT="-r $D"
+	else
+		OPT="-s"
+	fi
+	update-rc.d $OPT nfsserver defaults
+fi
+Name: perl-module-xsloader
+Name: python-rpm
+Name: net-snmp-server
+postinstall scriptlet (using /bin/sh):
+# net-snmp-server - postinst
+#!/bin/sh
+if type update-rc.d >/dev/null 2>/dev/null; then
+	if [ -n "$D" ]; then
+		OPT="-r $D"
+	else
+		OPT="-s"
+	fi
+	update-rc.d $OPT snmpd start 90 2 3 4 5 . stop 60 0 1 6 .
+fi
+Name: pango
+postinstall scriptlet (using /bin/sh):
+# pango - postinst
+#!/bin/sh
+if [ x"$D" = "x" ]; then
+	if [ -x /sbin/ldconfig ]; then /sbin/ldconfig ; fi
+fi
+Name: packagegroup-fsl-mfgtools
+Name: iputils
+Name: gdb
+Name: python-datetime
+Name: python-xml
+Name: python-math
+Name: python-compression
+Name: perl-module-re
+Name: perl-module-list-util
+Name: python-smartpm-backend-rpm
+Name: pango-module-basic-fc
+postinstall scriptlet (using /bin/sh):
+# pango-module-basic-fc - postinst
+#!/bin/sh
+if ! [ -e $D/etc/pango ] ; then
+	mkdir -p $D/etc/pango
+fi
+
+if [ -n "$D" ]; then
+	PSEUDO_UNLOAD=1 qemu-ppc -r 2.6.32  -L $D -E LD_LIBRARY_PATH=$D/usr/lib:$D/lib $D/usr/bin/pango-querymodules \
+		$D/usr/lib/pango/1.8.0/modules/*.so \
+		> $D/etc/pango/pango.modules 2>/dev/null
+
+	[ $? -ne 0 ] && exit 1
+
+	sed -i -e "s:$D::" $D/etc/pango/pango.modules
+
+	exit 0
+else
+	/usr/bin/pango-querymodules > /etc/pango/pango.modules
+fi
+Name: libgtk-2.0
+postinstall scriptlet (using /bin/sh):
+# libgtk-2.0 - postinst
+#!/bin/sh
+	update-alternatives --install /usr/bin/gtk-update-icon-cache gtk-update-icon-cache /usr/bin/gtk-update-icon-cache-2.0 10
+if [ x"$D" = "x" ]; then
+	if [ -x /sbin/ldconfig ]; then /sbin/ldconfig ; fi
+fi
+Name: packagegroup-fsl-networking-core
+Name: packagegroup-core-tools-debug
+Name: python-json
+Name: python-io
+Name: perl-module-file-basename
+Name: perl-module-scalar-util
+Name: libglade-2.0-0
+postinstall scriptlet (using /bin/sh):
+# libglade-2.0-0 - postinst
+#!/bin/sh
+if [ x"$D" = "x" ]; then
+	if [ -x /sbin/ldconfig ]; then /sbin/ldconfig ; fi
+fi
+Name: latencytop
+Name: python-pprint
+Name: python-mime
+Name: python-pickle
+Name: python-textutils
+Name: perl-module-threads-shared
+Name: perl-module-file-spec-unix
+Name: sysprof
+Name: packagegroup-core-tools-profile
+Name: python-subprocess
+Name: python-logging
+Name: perl-module-test-builder
+Name: perl-module-file-spec
+Name: libhugetlbfs
+postinstall scriptlet (using /bin/sh):
+# libhugetlbfs - postinst
+#!/bin/sh
+if [ x"$D" = "x" ]; then
+	if [ -x /sbin/ldconfig ]; then /sbin/ldconfig ; fi
+fi
+Name: python-netclient
+Name: perl-module-test-builder-module
+Name: perl-module-cwd
+Name: perl-module-file-spec-functions
+Name: packagegroup-fsl-tools-core
+Name: python-smartpm
+Name: perl-module-test-more
+Name: perl-module-file-find
+Name: smartpm
+Name: libmodule-pluggable-perl
+Name: bbs-tcm
+Name: bbs-hpmagentcmd
+postinstall scriptlet (using /bin/sh):
+#######################################
+if test -d /etc/rc.d
+then
+    INIT_ROOT=/etc/rc.d
+else
+    INIT_ROOT=/etc
+fi
+
+case $1 in
+    1)
+	ln -sf /opt/bladeservices/etc/init.d/hpm $INIT_ROOT/rc3.d/S08hpm
+	ln -sf /opt/bladeservices/etc/init.d/hpm $INIT_ROOT/rc6.d/K08hpm
+	ln -sf /opt/bladeservices/etc/init.d/hpm $INIT_ROOT/rc0.d/K08hpm
+	;;
+    *)
+	;;
+esac
+
+#######################################
+Name: bbs-hpib-debug
+Name: bbs-fuf
+Name: bbs-hpib
+Name: bbs-uboot-utils
+Name: bbs-prom-utils
+Name: bbs-hpib-clientsrc
+Name: bbs-hpib-snmp
+postinstall scriptlet (using /bin/sh):
+echo "Executing bbs-hpib-snmp post-install script:"
+cp /etc/snmp/hpibSubagent.log /etc/logrotate.d/
+/opt/bladeservices/bin/hpibsnmp-prep install
+#/etc/init.d/hpibsnmp restart
+Name: bbs-hpib-daemon
+postinstall scriptlet (using /bin/sh):
+echo "Executing bbs-hpib-daemon post-install script:"
+./opt/bladeservices/bin/bbs-hpib-prep install
+./etc/init.d/bbs-hpib restart
+Name: bbs-hpib-devel
+Name: bbs-hpib-snmp-debuginfo
