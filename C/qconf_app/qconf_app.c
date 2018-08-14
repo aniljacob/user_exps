@@ -31,6 +31,14 @@ struct qconf_entry{
 	u8 func_id;
 };
 
+struct free_entry {
+	struct list_head list_head;
+	u16 next_qbase;
+	u16 last_qbase;
+	u16 qs_free;
+	u16 index;
+};
+
 struct qconf_entry_head{
 	struct list_head vf_list;
 	struct list_head vf_free_list;
@@ -132,28 +140,32 @@ static int init_vf_free_list(void)
 	return 0;
 }
 
-static u16 find_first_fit(u16 qmax)
+static int find_first_fit(u16 qmax, u16 *qbase)
 {
 	struct qconf_entry *_free_entry = NULL;
 	struct qconf_entry *_tmp = NULL;
-	u16 qbase = 0;
+	int err = 0;
+	u8 found = 0;
 
 	pr_warn("Get first fit %u\n", qmax);
 	list_for_each_entry_safe(_free_entry, _tmp, &qconf_list.vf_free_list, list_head) {
 		pr_info("%s:%d qbase = %u, qmax = %u\n", __func__, __LINE__, _free_entry->qbase, _free_entry->qmax);
-		if (_free_entry->qmax > qmax) {
-			qbase = _free_entry->qbase;
+		if (_free_entry->qmax >= qmax) {
+			*qbase = _free_entry->qbase;
 			_free_entry->qmax -= qmax;
 			_free_entry->qbase += qmax; 
-			pr_info("%s:%d:qbase = %u, qmax = %u\n", __func__, __LINE__, qbase, _free_entry->qmax);
+			pr_info("%s:%d:qbase = %u, qmax = %u\n", __func__, __LINE__, *qbase, _free_entry->qmax);
+			found = 1;
 			break;
 		}
 	}
 
-	if (!qbase)
+	if (!found) {
 		pr_warn("No free slot found _free_entry->qmax/qmax = %u/%u\n", _free_entry->qmax ,qmax);
+		err = -EINVAL;
+	}
 
-	return qbase;
+	return err;
 }
 
 static int update_free_list(struct qconf_entry *entry)
@@ -183,7 +195,8 @@ static int update_free_list(struct qconf_entry *entry)
 	return 0;
 }
 
-void reset_init_qconf(struct list_head *listhead, int reset_cnt)
+/** grab from initial qconf, make qmax=0, qbase=0 cfg_state as zeroed*/
+void grab_from_init_qconf(struct list_head *listhead, int reset_cnt)
 {
 	struct qconf_entry *_qconf = NULL;
 	struct qconf_entry *_tmp = NULL;
@@ -202,7 +215,8 @@ static int xdev_set_qmax(u32 xdev, u8 func_id, u16 qmax)
 	struct qconf_entry *func_entry = NULL;
 	struct list_head *listhead = &qconf_list.vf_list;
 	u32 num_qs_free = qconf_list.qcnt_cfgd_free; 
-	int qbase = 0;
+	int err = 0;
+	u16 qbase = 0;
 
 	if (xdev)
 		listhead = &qconf_list.pf_list; 
@@ -218,23 +232,25 @@ static int xdev_set_qmax(u32 xdev, u8 func_id, u16 qmax)
 		return -EINVAL;
 	}
 
+	func_entry->qbase = 0;
+	err = find_first_fit(qmax, &qbase);
+	if (err < 0) {
+		if (qmax)
+			pr_info("Not able to find a fit for qmax = %u\n", qmax);
+		else
+			pr_info("0 q size, func_id = %u\n", func_id);
+
+		return err;
+	}
+	pr_info("%s:%d qbase = %u\n", __func__, __LINE__, qbase);
 	func_entry->cfg_state = Q_CONFIGURED;
 	func_entry->qmax = qmax;
-	func_entry->qbase = 0;
-	qbase = find_first_fit(qmax);
-	if (qbase < 0) {
-		pr_info("Not able to find a fit for qmax = %u\n", qmax);
-		return qbase;
-	}
-	pr_info("%s:qbase = %u\n", __func__, qbase);
 	func_entry->qbase = qbase;
 	list_del(&func_entry->list_head);
 	list_add_tail(&func_entry->list_head, listhead);
-	
 
 	return 0;
 }
-
 
 static int xdev_del_qconf(u32 xdev, u8 func_id)
 {
@@ -294,7 +310,7 @@ static int xdev_qconf_init(void)
 {
 	INIT_LIST_HEAD(&qconf_list.vf_list);
 	INIT_LIST_HEAD(&qconf_list.pf_list);
-	qconf_list.vf_qmax = 1000;
+	qconf_list.vf_qmax = 2048;
 	qconf_list.pf_qmax = 2048 - qconf_list.vf_qmax;
 	qconf_list.vf_qbase = qconf_list.pf_qmax;
 	qconf_list.qcnt_cfgd_free = qconf_list.vf_qmax;
@@ -335,7 +351,7 @@ static void test_qconf(void)
 		xdev_create_qconf(PCI_TYPE_VF, i);
 	xdev_dump_qconf(PCI_TYPE_VF);
 	xdev_dump_qconf(PCI_TYPE_VF_FREE);
-	xdev_set_qmax(PCI_TYPE_VF, 0, 400);
+	xdev_set_qmax(PCI_TYPE_VF, 0, 2048);
 	xdev_dump_qconf(PCI_TYPE_VF);
 	xdev_dump_qconf(PCI_TYPE_VF_FREE);
 	xdev_set_qmax(PCI_TYPE_VF, 2, 100);
