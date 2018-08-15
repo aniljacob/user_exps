@@ -9,15 +9,20 @@
 enum pci_dev_type {
 	PCI_TYPE_VF,
 	PCI_TYPE_PF,
-	PCI_TYPE_VF_FREE,
 	PCI_TYPE_INVAL
 };
 
 enum q_cfg_state{
 	Q_INITIAL,
 	Q_CONFIGURED,
-	Q_FREE,
 	Q_INVALID
+};
+
+struct free_entry {
+	struct list_head list_head;
+	u16 next_qbase;
+	u16 free;
+	u16 index;
 };
 
 struct qconf_entry{
@@ -29,14 +34,6 @@ struct qconf_entry{
 	enum q_cfg_state cfg_state;
 	enum pci_dev_type type;
 	u8 func_id;
-};
-
-struct free_entry {
-	struct list_head list_head;
-	u16 next_qbase;
-	u16 last_qbase;
-	u16 qs_free;
-	u16 index;
 };
 
 struct qconf_entry_head{
@@ -53,6 +50,16 @@ struct qconf_entry_head{
 
 #define pr_info printf
 #define pr_warn printf
+#define pr_debug printf
+#define pr_err printf
+
+static inline void list_insert(struct list_head *new, struct list_head *prev)
+{
+	new->next = prev;
+	new->prev = prev->prev;
+	prev->prev->next = new;
+	prev->prev = new;
+}
 
 static void xdev_dump_qconf(u32 xdev)
 {
@@ -60,26 +67,39 @@ static void xdev_dump_qconf(u32 xdev)
 	struct qconf_entry *_tmp = NULL;
 	struct list_head *listhead;
 	const char *list_str[][8] = {{"vf"},{"pf"},{"vf-free"}};
+	int end = 0;
 
 	if (xdev == PCI_TYPE_PF)
 		listhead = &qconf_list.pf_list;
-	else if (xdev == PCI_TYPE_VF_FREE)
-		listhead = &qconf_list.vf_free_list;
 	else
 		listhead = &qconf_list.vf_list;
 
 	pr_info("Dumping %s list\n", *list_str[xdev]);
 
 	list_for_each_entry_safe(_qconf, _tmp, listhead, list_head) {
-		if (xdev == PCI_TYPE_VF_FREE)
-			pr_info("q_free = %u, qbase = %u~%u\n",
-					 _qconf->qmax, _qconf->qbase,
-					_qconf->qbase + _qconf->qmax - 1); 
-		else
-			pr_info("func_id = %u, qmax = %u, qbase = %u~%u, cfg_state = %c\n",
-					_qconf->func_id, _qconf->qmax, _qconf->qbase,
-					_qconf->qbase + _qconf->qmax - 1, 
-					_qconf->cfg_state ? 'c':'i');
+		end = ((int)(_qconf->qbase + _qconf->qmax)) - 1;
+		if (end < 0)
+			end = 0;
+		pr_info("func_id = %u, qmax = %u, qbase = %u~%u, cfg_state = %c\n",
+				_qconf->func_id, _qconf->qmax, _qconf->qbase,
+				end,
+				_qconf->cfg_state ? 'c':'i');
+	}
+
+	return;
+}
+
+static void xdev_dump_freelist(void)
+{
+	struct free_entry *_free = NULL;
+	struct free_entry *_tmp = NULL;
+	struct list_head *listhead = &qconf_list.vf_free_list;
+
+	pr_info("Dumping free list\n");
+
+	list_for_each_entry_safe(_free, _tmp, listhead, list_head) {
+		pr_info("free-cnt = %u, qbase-next = %d\n",
+				_free->free, _free->next_qbase);
 	}
 
 	return;
@@ -103,38 +123,30 @@ static struct qconf_entry *find_func_qentry(u32 xdev, u8 func_id)
 	return NULL;
 }
 
-static inline void list_insert(struct list_head *new, struct list_head *prev)
+struct free_entry *create_free_entry(u16 qmax, u16 qbase)
 {
-	new->next = prev;
-	new->prev = prev->prev;
-	prev->prev->next = new;
-}
+	struct free_entry *_free_entry = NULL;
 
-struct qconf_entry *create_free_entry(u16 qmax, u16 qbase)
-{
-	struct qconf_entry *_free_entry = NULL;
-
-	_free_entry = (struct qconf_entry *)malloc(sizeof(struct qconf_entry));
+	_free_entry = (struct free_entry *)calloc(1, sizeof(struct free_entry));
 	if (!_free_entry)
 		return _free_entry;
-	_free_entry->qmax = qmax;
-	_free_entry->qbase = qbase;
-	_free_entry->cfg_state = Q_FREE;
+	_free_entry->free = qmax;
+	_free_entry->next_qbase = qbase;
 
 	return _free_entry;
 }
 
 static int init_vf_free_list(void)
 {
-	struct qconf_entry *_free_entry = NULL;
-	u16 qmax = 0;
-	u16 qbase = 0;
+	struct free_entry *_free_entry = NULL;
+	u16 free = 0;
+	u16 next_qbase = 0;
 
 	INIT_LIST_HEAD(&qconf_list.vf_free_list);
-	qmax = qconf_list.vf_qmax;
-	qbase = qconf_list.vf_qbase;
+	free = qconf_list.vf_qmax;
+	next_qbase = qconf_list.vf_qbase;
 
-	_free_entry = create_free_entry(qmax, qbase);
+	_free_entry = create_free_entry(free, next_qbase);
 	list_add_tail(&_free_entry->list_head, &qconf_list.vf_free_list);
 
 	return 0;
@@ -142,68 +154,103 @@ static int init_vf_free_list(void)
 
 static int find_first_fit(u16 qmax, u16 *qbase)
 {
-	struct qconf_entry *_free_entry = NULL;
-	struct qconf_entry *_tmp = NULL;
+	struct free_entry *_free_entry = NULL;
+	struct free_entry *_tmp = NULL;
 	int err = 0;
 	u8 found = 0;
 
-	pr_warn("Get first fit %u\n", qmax);
+	pr_info("Get first fit %u\n", qmax);
 	list_for_each_entry_safe(_free_entry, _tmp, &qconf_list.vf_free_list, list_head) {
-		pr_info("%s:%d qbase = %u, qmax = %u\n", __func__, __LINE__, _free_entry->qbase, _free_entry->qmax);
-		if (_free_entry->qmax >= qmax) {
-			*qbase = _free_entry->qbase;
-			_free_entry->qmax -= qmax;
-			_free_entry->qbase += qmax; 
-			pr_info("%s:%d:qbase = %u, qmax = %u\n", __func__, __LINE__, *qbase, _free_entry->qmax);
+		pr_info("%s:%d qbase = %u, qmax = %u\n", __func__, __LINE__, _free_entry->next_qbase, _free_entry->free);
+		if (_free_entry->free >= qmax) {
+			*qbase = _free_entry->next_qbase;
+			_free_entry->free -= qmax;
+			_free_entry->next_qbase += qmax; 
+			qconf_list.qcnt_cfgd_free -= qmax;
 			found = 1;
+			pr_info("%s:%d:qbase = %u, qmax = %u\n", __func__, __LINE__, *qbase, _free_entry->free);
 			break;
 		}
 	}
 
 	if (!found) {
-		pr_warn("No free slot found _free_entry->qmax/qmax = %u/%u\n", _free_entry->qmax ,qmax);
+		pr_warn("No free slot found free/qmax = %u/%u\n", _free_entry->free ,qmax);
 		err = -EINVAL;
 	}
 
 	return err;
 }
 
+static int defrag_free_list(void)
+{
+	struct free_entry *_free = NULL;
+	struct free_entry *_tmp = NULL;
+	struct free_entry *_prev = NULL;
+	struct list_head *listhead = &qconf_list.vf_free_list;
+	int defrag_cnt = 0;
+
+	pr_debug("Defragmenting free list\n");
+	list_for_each_entry_safe(_free, _tmp, listhead, list_head) {
+		if (_prev) {
+			if ((_prev->next_qbase + _prev->free) == _free->next_qbase) {
+				_free->free += _prev->free;
+				_free->next_qbase = _prev->next_qbase;
+				list_del(&_prev->list_head);
+				free(_prev);
+				defrag_cnt++;
+			}
+		}
+		_prev = _free;
+	}
+
+	if (defrag_cnt)
+		pr_debug("Defragmented %d entries\n", defrag_cnt);
+
+	return defrag_cnt;
+}
+
+
 static int update_free_list(struct qconf_entry *entry)
 {
-	struct qconf_entry *_free_entry = NULL;
-	struct qconf_entry *_free_new = NULL;
-	struct qconf_entry *_tmp = NULL;
+	struct free_entry *_free_entry = NULL;
+	struct free_entry *_free_new = NULL;
+	struct free_entry *_tmp = NULL;
+	struct list_head *listhead = &qconf_list.vf_free_list;
 
-	pr_info("%s:%d entry->qbase = %u, entry->qmax = %u\n", __func__, __LINE__, entry->qbase, entry->qmax);
-	list_for_each_entry_safe(_free_entry, _tmp, &qconf_list.vf_free_list, list_head) {
-		pr_info("%s:%d free-entry qstart = %u, free = %u\n", __func__, __LINE__, _free_entry->qbase, _free_entry->qmax);
-		if (entry->qbase < _free_entry->qbase)
+	if (entry->cfg_state != Q_CONFIGURED)
+		return 0;
+
+	list_for_each_entry_safe(_free_entry, _tmp, listhead, list_head) {
+		if (entry->qbase < _free_entry->next_qbase) {
+			_free_new = create_free_entry(entry->qmax, entry->qbase);
+			list_insert(&_free_new->list_head, &_free_entry->list_head);
+			qconf_list.qcnt_cfgd_free += entry->qmax;
 			break;
+		}
 	}
 
-	//is it continuous??
-	if (_free_entry->qmax == (entry->qbase + entry->qmax)) {
-		_free_entry->qbase -= entry->qmax;
-		_free_entry->qmax += entry->qmax;
-		pr_info("%s:%d free-entry qstart = %u, free = %u\n", __func__, __LINE__, _free_entry->qbase, _free_entry->qmax);
-	} else {
-		pr_info("%s:%d free-entry qstart = %u, free = %u\n", __func__, __LINE__, entry->qbase, entry->qmax);
-		_free_new = create_free_entry(entry->qmax, entry->qbase);
-		list_insert(&_free_new->list_head, &_free_entry->list_head);
-	}
+	defrag_free_list();
 
 	return 0;
 }
 
 /** grab from initial qconf, make qmax=0, qbase=0 cfg_state as zeroed*/
-void grab_from_init_qconf(struct list_head *listhead, int reset_cnt)
+void grab_from_init_qconf(struct list_head *listhead)
 {
 	struct qconf_entry *_qconf = NULL;
 	struct qconf_entry *_tmp = NULL;
-	int cnt = reset_cnt;
+	int grab_cnt = 0;
+
+	if (qconf_list.qcnt_init_used > qconf_list.qcnt_cfgd_free) {
+		grab_cnt = qconf_list.qcnt_init_used - qconf_list.qcnt_cfgd_free;
+		qconf_list.qcnt_init_used -= grab_cnt;
+	}
 
 	list_for_each_entry_safe(_qconf, _tmp, listhead, list_head) {
-		if (!cnt--)
+		/** already grabbed */
+		if (!_qconf->qmax || (_qconf->cfg_state != Q_INITIAL))
+			continue;
+		if (!grab_cnt--)
 			break;
 		_qconf->qmax = 0;
 		_qconf->qbase = 0;
@@ -218,18 +265,24 @@ static int xdev_set_qmax(u32 xdev, u8 func_id, u16 qmax)
 	int err = 0;
 	u16 qbase = 0;
 
+	pr_debug("Setting qmax func_id = %u, qmax = %u\n", func_id, qmax);
+
 	if (xdev)
 		listhead = &qconf_list.pf_list; 
 
 	if (qmax > num_qs_free) {
-		pr_warn("No free qs, requested %u, free = %u\n", qmax, num_qs_free);
+		pr_warn("No free qs!, requested/free = %u/%u\n", qmax, num_qs_free);
 		return -EINVAL;
 	}
 
 	func_entry = find_func_qentry(xdev, func_id);
 	if (!func_entry) {
-		pr_info("This should not happen\n");
+		pr_err("Set qmax request on non available device %u\n", func_id);
 		return -EINVAL;
+	}
+
+	if (func_entry->cfg_state == Q_CONFIGURED) {
+		update_free_list(func_entry);
 	}
 
 	func_entry->qbase = 0;
@@ -242,12 +295,14 @@ static int xdev_set_qmax(u32 xdev, u8 func_id, u16 qmax)
 
 		return err;
 	}
+
 	pr_info("%s:%d qbase = %u\n", __func__, __LINE__, qbase);
 	func_entry->cfg_state = Q_CONFIGURED;
 	func_entry->qmax = qmax;
 	func_entry->qbase = qbase;
 	list_del(&func_entry->list_head);
 	list_add_tail(&func_entry->list_head, listhead);
+	grab_from_init_qconf(listhead);
 
 	return 0;
 }
@@ -275,14 +330,16 @@ static int xdev_create_qconf(u32 xdev, u8 func_id)
 		listhead = &qconf_list.pf_list;
 	}
 
-	_qconf = (struct qconf_entry *)malloc(sizeof(struct qconf_entry));
+	_qconf = (struct qconf_entry *)calloc(1, sizeof(struct qconf_entry));
 	if (!_qconf)
 		return -ENOMEM;
 
 	_qconf->func_id = func_id;
 	_qconf->cfg_state = Q_INITIAL;
-	_qconf->qmax = 1;
-	_qconf->qbase = 2048 - MAX_NUM_VFS + qconf_list.qcnt_init_used;
+	if (qconf_list.qcnt_cfgd_free){
+		_qconf->qmax = 1;
+		_qconf->qbase = 2047 - qconf_list.qcnt_init_used;
+	}
 
 	qconf_list.qcnt_init_used++;
 
@@ -296,6 +353,7 @@ static int xdev_destroy_qconf(u32 xdev, u8 func_id)
 {
 	struct qconf_entry *_qconf = NULL;
 
+	pr_debug("Destroying func_id = %u\n", func_id);
 	_qconf = find_func_qentry(xdev, func_id);
 	if (_qconf) {
 		list_del(&_qconf->list_head);
@@ -310,7 +368,7 @@ static int xdev_qconf_init(void)
 {
 	INIT_LIST_HEAD(&qconf_list.vf_list);
 	INIT_LIST_HEAD(&qconf_list.pf_list);
-	qconf_list.vf_qmax = 2048;
+	qconf_list.vf_qmax = 252;
 	qconf_list.pf_qmax = 2048 - qconf_list.vf_qmax;
 	qconf_list.vf_qbase = qconf_list.pf_qmax;
 	qconf_list.qcnt_cfgd_free = qconf_list.vf_qmax;
@@ -325,6 +383,8 @@ static void xdev_qconf_cleanup(void)
 {
 	struct qconf_entry *_qconf = NULL;
 	struct qconf_entry *_tmp = NULL;
+	struct free_entry *_free_entry = NULL;
+	struct free_entry *_free_tmp = NULL;
 	struct list_head *listhead = &qconf_list.vf_list;
 
 	list_for_each_entry_safe(_qconf, _tmp, listhead, list_head) {
@@ -333,15 +393,29 @@ static void xdev_qconf_cleanup(void)
 	}
 
 	_qconf = NULL;
-	_tmp = NULL;
 	listhead = &qconf_list.pf_list;
 	list_for_each_entry_safe(_qconf, _tmp, listhead, list_head) {
 		list_del(&_qconf->list_head);
 		free(_qconf);
 	}
 
+	listhead = &qconf_list.vf_free_list;
+	list_for_each_entry_safe(_free_entry, _free_tmp, listhead, list_head) {
+		list_del(&_free_entry->list_head);
+		free(_free_entry);
+	}
+
 	return ;
 }
+
+u8 enable = 1;
+#define PRINTVF(enable) do { \
+	if (enable) { \
+		xdev_dump_freelist(); \
+		xdev_dump_qconf(PCI_TYPE_VF); \
+		getchar(); \
+	} \
+}while (0)
 
 static void test_qconf(void)
 {
@@ -349,32 +423,38 @@ static void test_qconf(void)
 
 	for (i = 0; i < 16; i++)
 		xdev_create_qconf(PCI_TYPE_VF, i);
-	xdev_dump_qconf(PCI_TYPE_VF);
-	xdev_dump_qconf(PCI_TYPE_VF_FREE);
+	PRINTVF(enable);
+	
 	xdev_set_qmax(PCI_TYPE_VF, 0, 2048);
-	xdev_dump_qconf(PCI_TYPE_VF);
-	xdev_dump_qconf(PCI_TYPE_VF_FREE);
+	PRINTVF(enable);
+	
 	xdev_set_qmax(PCI_TYPE_VF, 2, 100);
-	xdev_dump_qconf(PCI_TYPE_VF);
-	xdev_dump_qconf(PCI_TYPE_VF_FREE);
-	//xdev_destroy_qconf(PCI_TYPE_VF, 0);
-	//xdev_dump_qconf(PCI_TYPE_VF_FREE);
-	//xdev_dump_qconf(PCI_TYPE_VF);
-//	xdev_del_qconf(PCI_TYPE_VF, 12);
-	xdev_set_qmax(PCI_TYPE_VF, 4, 70);
-	xdev_dump_qconf(PCI_TYPE_VF);
-	xdev_destroy_qconf(PCI_TYPE_VF, 2);
-	xdev_set_qmax(PCI_TYPE_VF, 15, 300);
-	//xdev_destroy_qconf(PCI_TYPE_VF, 4);
-	xdev_dump_qconf(PCI_TYPE_VF_FREE);
-	xdev_set_qmax(PCI_TYPE_VF, 8, 22);
-	xdev_dump_qconf(PCI_TYPE_VF);
-#if 0
-	xdev_dump_qconf(PCI_TYPE_VF);
-	xdev_create_qconf(PCI_TYPE_VF, 12);
-	xdev_dump_qconf(PCI_TYPE_VF);
-#endif
+	PRINTVF(enable);
 
+	xdev_destroy_qconf(PCI_TYPE_VF, 0);
+	PRINTVF(enable);
+#if 0
+	 for (i = 16; i < 60; i++)
+		xdev_create_qconf(PCI_TYPE_VF, i);
+#endif
+	xdev_del_qconf(PCI_TYPE_VF, 12);
+	PRINTVF(enable);
+	xdev_set_qmax(PCI_TYPE_VF, 4, 70);
+	PRINTVF(enable);
+#if 0
+	 for (i = 16; i < 60; i++)
+		xdev_create_qconf(PCI_TYPE_VF, i);
+#endif
+	xdev_destroy_qconf(PCI_TYPE_VF, 2);
+	PRINTVF(enable);
+	xdev_set_qmax(PCI_TYPE_VF, 15, 300);
+	PRINTVF(enable);
+	xdev_destroy_qconf(PCI_TYPE_VF, 4);
+	PRINTVF(enable);
+	xdev_set_qmax(PCI_TYPE_VF, 8, 22);
+	PRINTVF(enable);
+	xdev_set_qmax(PCI_TYPE_VF, 8, 220);
+	PRINTVF(enable);
 }
 
 
